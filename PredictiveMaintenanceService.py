@@ -99,7 +99,7 @@ def state_transitions(df, column_name):
     return df
 
 def pressure_difference(df, pressure1, pressure2):
-    df['Pressure_Difference_Feature_Feature'] = df[pressure1] - df[pressure2]
+    df['Pressure_Difference_Feature'] = df[pressure1] - df[pressure2]
     return df
 
 # FAULT DIAGNOSTICS 
@@ -114,31 +114,26 @@ def fault_diagnostics_system():
     return transition
 
 def idle_state_fault(data):
-    # Placeholder for the logic to detect an abnormal event
     if event_detected(data):  
         return diagnostic_state
     return idle_state_fault
 
 def diagnostic_state(data):
-    # Placeholder for the logic to perform diagnostics and detect failures
     if fault_detection(data):  
         return fault_processing_state
     return idle_state_fault
 
 def fault_processing_state(data):
-    # Placeholder for the logic to handle fault processing
     fault_time = alarm(data)
     fault_location = fault_isolation(data)
     fault_severity = fault_identification(data)
     return lambda _: assessment_state_fault(fault_time, fault_location, fault_severity)
 
 def assessment_state_fault(fault_time, fault_location, fault_severity):
-    # Placeholder for the logic to assess the operational status and generate a report
     report = report_generate(fault_time, fault_location, fault_severity)
     report_send(report)
     return idle_state_fault
 
-# Placeholders for event detection and actions
 def event_detected(data):
     """
     check if data is available
@@ -175,17 +170,13 @@ def report_send(report):
 # PROGNOSTICS ASSESSMENT
 def prognostics_assessment():
     current_state = idle_state_prognostics  # Initial state
-
     def transition(data):
         nonlocal current_state
-        # The state function is called and the next state is returned
         current_state = current_state(data)
         return current_state
-
     return transition
 
 def idle_state_prognostics(data):
-    # Transition to prognostic state based on a time cycle interval
     if time_cycle_due():
         return prognostic_state
     return idle_state_prognostics
@@ -218,78 +209,47 @@ def assessment_state_prognostics(rul):
     return idle_state_prognostics
 
 def time_cycle_due():
-    # Implement time cycle check logic
-    # Placeholder: return True to simulate the cycle time being due
     return True
 
 def predict_degradation_trend(data):
     # Perform analysis to determine the degradation trend
-    # Placeholder: return a dummy trend and a condition result
-    degradation_trend = "dummy_trend"
-    trend_analysis_result = True  # Replace with actual condition check
+    degradation_trend = "test"
+    trend_analysis_result = True  
     return degradation_trend, trend_analysis_result
 
 def estimate_rul(degradation_trend):
-    # Implement RUL estimation logic
-    # Placeholder: return a dummy RUL estimate
-    rul = 100  # Replace with actual logic
-    return rul
+    # RUL estimation logic
+    rul = 100  
 
 def analyze_health_status(rul):
-    # Implement health status analysis logic
-    # Placeholder: return a dummy health status
-    health_status = "Good"  # Replace with actual logic
+    # health status analysis logic
+    health_status = "Good" 
     return health_status
 
 def generate_health_report(health_status):
-    # Implement health report generation logic
-    # Placeholder: return a dummy report
-    report = "Health Report"  # Replace with actual logic
+    report = "Health Report"  
     return report
 
 def send_health_report(report):
-    # Implement report sending logic to health management
-    # Placeholder: simulate sending the report
+    # report sending logic to health management
     print("Sending report:", report)
 
 # HEALTH MANAGEMENT
 def health_management():
-    # Wait for assessment reports, which could be a blocking call until reports are received
+    # Wait for assessment reports
     reports = receive_reports()
-
-    # Once reports are received, analyze them and generate maintenance advisories
+    # Reports are received, analyze them and generate maintenance advisories
     advisories = generate_advisories(reports)
-
-    # With advisories generated, manage the maintenance services, which could include
-    # deciding the transmission of advisories to an external health services system
-    manage_maintenance(advisories)
-
     # Transmit the advisories to the external system for maintenance decision-making
     transmit_advisories(advisories)
 
-    # This function has completed its mission after transmitting advisories
-    print("Health Management module has completed its mission.")
-
 def receive_reports():
-    # Implement logic to receive reports, potentially blocking until reports are available
-    # Placeholder: return a list of dummy reports
     return ["report1", "report2"]
 
 def generate_advisories(reports):
-    # Implement logic to analyze reports and generate advisories
-    # Placeholder: return a list of dummy advisories
-    return ["advisory1 based on report1", "advisory2 based on report2"]
-
-def manage_maintenance(advisories):
-    # Implement logic to manage maintenance advisories before they are transmitted
-    # This could involve prioritization, scheduling, etc.
-    # Placeholder: simply log the advisories
-    for advisory in advisories:
-        print("Managing maintenance advisory:", advisory)
+    return ["advisory1", "advisory2"]
 
 def transmit_advisories(advisories):
-    # Implement logic to transmit advisories to the external maintenance management system
-    # Placeholder: simulate transmission by printing advisories
     for advisory in advisories:
         print("Transmitting advisory:", advisory)
 
