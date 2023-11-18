@@ -110,26 +110,38 @@ def fault_diagnostics_system():
         while True:
             current_state = current_state(data)
             if current_state is idle_state_fault:
-                return 0
+                return 0 # or break?
     return transition
 
 def idle_state_fault(data):
-    if event_detected(data):  
+    """
+    detects incoming events
+    """
+    if event_detected(data): # if there is incoming data 
         return diagnostic_state
     return idle_state_fault
 
 def diagnostic_state(data):
-    if fault_detection(data):  
+    """
+    detects the fault
+    """
+    if fault_detection(data):  # if there is a fault detected
         return fault_processing_state
     return idle_state_fault
 
-def fault_processing_state(data):
+def fault_processing_state(data): 
+    """
+    processes the fault, by determining time, location and severity of fault
+    """
     fault_time = alarm(data)
     fault_location = fault_isolation(data)
     fault_severity = fault_identification(data)
     return lambda _: assessment_state_fault(fault_time, fault_location, fault_severity)
 
 def assessment_state_fault(fault_time, fault_location, fault_severity):
+    """
+    creates a report of fault to send to health management
+    """
     report = report_generate(fault_time, fault_location, fault_severity)
     report_send(report)
     return idle_state_fault
@@ -164,8 +176,10 @@ def report_generate(fault_time, fault_location, fault_severity):
     return pd.DataFrame.from_dict(fault_time | fault_location | fault_severity, orient='index')
 
 def report_send(report):
-    report.to_excel('fault_diagnostics_report.xlsx')
-    report.to_excel('fault_diagnostics_report.xlsx', startrow = writer.sheets['Sheet1'].max_row, index = False, Header = False)
+    """
+    Send the report to the health management system.
+    """
+    health_management.receive_report(report)
 
 # PROGNOSTICS ASSESSMENT
 def prognostics_assessment():
@@ -243,6 +257,33 @@ def health_management():
     # Transmit the advisories to the external system for maintenance decision-making
     transmit_advisories(advisories)
 
+class HealthManagementSystem:
+    def __init__(self):
+        self.reports = []
+
+    def receive_report(self, report):
+        """
+        Receives and stores reports.
+        """
+        self.reports.append(report)
+        print("Report received and stored.")
+
+    def process_reports(self):
+        """
+        Process all received reports.
+        """
+        if self.reports:
+            print("Processing reports in health management system:")
+            for report in self.reports:
+                print(report)
+            # Clear the list after processing
+            self.reports.clear()
+        else:
+            print("No reports to process.")
+        
+    def generate_advisory(self, reports):
+        pass
+
 def receive_reports():
     return ["report1", "report2"]
 
@@ -255,6 +296,8 @@ def transmit_advisories(advisories):
 
 # MAIN
 def main():
+    health_management = HealthManagementSystem()
+
     file_path = "CAN_short_20220504_cleaned.xlsx"
     sensor_data_generator = simulated_sensor(file_path)
     stored_data = pd.DataFrame()
