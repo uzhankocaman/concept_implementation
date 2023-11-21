@@ -1,4 +1,5 @@
 import pandas as pd
+import logging 
 
 class DataAcquisition:
     def __init__(self):
@@ -8,28 +9,17 @@ class DataAcquisition:
         """
         Accesses data from the sensor data generator.
         """
+        logging.info("Acquiring data...")
         try:
-            return next(sensor_data_generator)
+            data = pd.DataFrame(next(sensor_data_generator), index=[len(self.accumulated_data)])
+            self.accumulated_data = self.accumulated_data._append(data, ignore_index=True)
+            return data
         except StopIteration:
             return None
-
-    def set_data(self, data_row):
-        """
-        Sets a row of data in the accumulated DataFrame.
-        """
-        if data_row is not None:
-            self.accumulated_data = self.accumulated_data.append(data_row, ignore_index=True)
 
     def get_data(self):
         """
         Gets all accumulated data
         """
         return self.accumulated_data
-
-# Example usage
-# Assuming the existence of a sensor data generator function
-sensor_data_generator = simulated_sensor("sensor_data.xlsx")  # Replace with the actual generator
-data_acquisition_system = DataAcquisition()
-
-# Acquire and store a single data row
-data_row, data_available = data_acquisition_system.acquire_data(sensor_data_generator)
+    

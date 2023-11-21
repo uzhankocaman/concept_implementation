@@ -317,7 +317,6 @@ def main():
         fault_diagnostic_assessment = fault_diagnostics_system()
         fault_diagnostic_assessment(processed_datapoint)
 
-main()
 
 
 

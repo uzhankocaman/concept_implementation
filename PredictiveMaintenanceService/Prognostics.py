@@ -1,32 +1,36 @@
 class Prognostics:
-    def __init__(self):
-        self.current_state = self.idle_state_prognostics
+    def __init__(self, report_callback):
+        self.current_state = self.idle_state
+        self.report_callback = report_callback
 
-    def transition(self, data):
+    def run(self, data):
+        """
+        executes the state state transition
+        """
         self.current_state = self.current_state(data)
         return self.current_state
 
-    def idle_state_prognostics(self, data):
+    def idle_state(self, data):
         if self.time_cycle_due():
             return self.prognostic_state
-        return self.idle_state_prognostics
+        return self.idle_state
 
     def prognostic_state(self, data):
         degradation_trend, trend_analysis_result = self.predict_degradation_trend(data)
         if trend_analysis_result:
             return lambda _: self.rul_predict_state(degradation_trend)
         else:
-            return self.idle_state_prognostics
+            return self.idle_state
 
     def rul_predict_state(self, degradation_trend):
         rul = self.estimate_rul(degradation_trend)
-        return lambda _: self.assessment_state_prognostics(rul)
+        return lambda _: self.assessment_state(rul)
 
-    def assessment_state_prognostics(self, rul):
+    def assessment_state(self, rul):
         health_status = self.analyze_health_status(rul)
-        report = self.generate_health_report(health_status)
-        self.send_health_report(report)
-        return self.idle_state_prognostics
+        report = self.report_generate(health_status)
+        self.report_send(report)
+        return self.idle_state
 
     def time_cycle_due(self):
         return True
@@ -42,10 +46,17 @@ class Prognostics:
     def analyze_health_status(self, rul):
         return "Good"
 
-    def generate_health_report(self, health_status):
-        return "Health Report"
+    def report_generate(self, health_status):
+        """
+        Generate a report based on the fault information
+        """
+        return 0
 
-    def send_health_report(self, report):
-        print("Sending report:", report)
+    def report_send(self, report):
+        """
+        Send the report to the health management system.
+        """
+        if self.report_callback:
+            self.report_callback(report)
 
 

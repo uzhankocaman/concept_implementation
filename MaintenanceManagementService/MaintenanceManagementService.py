@@ -1,5 +1,7 @@
 from datetime import datetime
 from typing import List
+import logging
+import pandas as pd
 
 class Advisory:
     def __init__(self, condition: str, severity: str, timestamp: datetime):
@@ -11,6 +13,19 @@ class Advisory:
         return f"Condition: {self.condition}, Severity: {self.severity}, Time: {self.timestamp}"
 
 class MaintenanceServiceSystem:
+    def __init__(self):
+        self.advisory = pd.DataFrame() # Advisory()
+
+    def receive_advisory(self, report):
+        """
+        Receives and stores advisory.
+        """
+        logging.info("Advisory received.")
+        self.advisory = self.advisory._append(report)
+
+    def run(self):
+        print("Succesfully running maintenance service system.")
+
     def update_maintenance_schedule(self, advisories: List[Advisory]):
         pass
 
