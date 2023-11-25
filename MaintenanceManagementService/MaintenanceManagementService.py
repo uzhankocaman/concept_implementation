@@ -3,6 +3,8 @@ from typing import List
 import logging
 import pandas as pd
 
+from monitoring import MonitoringUI
+
 class Advisory:
     def __init__(self, condition: str, severity: str, timestamp: datetime):
         self.condition = condition
@@ -15,6 +17,10 @@ class Advisory:
 class MaintenanceServiceSystem:
     def __init__(self):
         self.advisory = pd.DataFrame() # Advisory()
+        self.monitoring_ui = MonitoringUI()
+
+    def real_time_monitoring(self):
+        self.monitoring_ui.run()
 
     def receive_advisory(self, report):
         """
@@ -37,9 +43,6 @@ class MaintenanceServiceSystem:
 
     def decide_maintenance_actions(self, advisories: List[Advisory]):
         pass
-
-    def real_time_monitoring(self):
-        print("Monitoring in real-time.")
 
     def send_alert_notifications(self):
         print("Sending alert notifications.")
