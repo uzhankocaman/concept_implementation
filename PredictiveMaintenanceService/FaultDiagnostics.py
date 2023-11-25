@@ -1,6 +1,8 @@
 import pandas as pd
 import logging
 
+#TODO: if no fault (and event) is detected, no report is generated. 
+#      instead, generate a report that indicates a good state
 class FaultDiagnostics:
     def __init__(self, report_callback):
         self.current_state = self.idle_state_fault

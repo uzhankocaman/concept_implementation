@@ -30,7 +30,7 @@ def main():
 
     maintenance_service = MaintenanceServiceSystem()
 
-    file_path = "data/CAN_testing.xlsx"
+    file_path = "data/CAN_short_20220504.xlsx"
     sensor_data_generator = simulated_sensor(file_path, 0)
     while True:
         raw_data = data_acquisition.access_data(sensor_data_generator)

@@ -1,3 +1,5 @@
+#TODO: state transition
+#TODO: report generation
 class Prognostics:
     def __init__(self, report_callback):
         self.current_state = self.idle_state
@@ -8,19 +10,23 @@ class Prognostics:
         executes the state state transition
         """
         self.current_state = self.current_state(data)
+        while True:
+            self.current_state = self.current_state(data)
+            if self.current_state == self.idle_state_fault:
+                break
         return self.current_state
 
-    def idle_state(self, data):
-        if self.time_cycle_due():
-            return self.prognostic_state
-        return self.idle_state
+    # def idle_state(self, data):
+    #     if self.time_cycle_due():
+    #         return self.prognostic_state
+    #     return self.idle_state
 
     def prognostic_state(self, data):
         degradation_trend, trend_analysis_result = self.predict_degradation_trend(data)
         if trend_analysis_result:
             return lambda _: self.rul_predict_state(degradation_trend)
         else:
-            return self.idle_state
+            return self.assessment_state
 
     def rul_predict_state(self, degradation_trend):
         rul = self.estimate_rul(degradation_trend)
@@ -31,9 +37,6 @@ class Prognostics:
         report = self.report_generate(health_status)
         self.report_send(report)
         return self.idle_state
-
-    def time_cycle_due(self):
-        return True
 
     def predict_degradation_trend(self, data):
         degradation_trend = "test"
@@ -48,7 +51,7 @@ class Prognostics:
 
     def report_generate(self, health_status):
         """
-        Generate a report based on the fault information
+        Generate a report based on the prognostics information
         """
         return 0
 
