@@ -2,7 +2,7 @@
 #TODO: report generation
 class Prognostics:
     def __init__(self, report_callback):
-        self.current_state = self.idle_state
+        self.current_state = self.prognostic_state
         self.report_callback = report_callback
 
     def run(self, data):

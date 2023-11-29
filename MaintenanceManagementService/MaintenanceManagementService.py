@@ -13,7 +13,7 @@ from MaintenanceManagementService.monitoring import MonitoringUI
 # TODO: inventory and logistics management
 # TODO: alert notification 
 class Advisory:
-    def __init__(self, condition: str = ".", severity: str = ".", timestamp: datetime = datetime.datetime(1999, 8, 5), advisory: str = "."):
+    def __init__(self, condition, severity, timestamp, advisory):
         self.condition = condition
         self.severity = severity
         self.timestamp = timestamp
@@ -30,7 +30,7 @@ class MaintenanceServiceSystem:
         
     def run(self):
         print("Succesfully running maintenance service system.")
-        # self.real_time_monitoring()
+        self.real_time_monitoring()
 
     def real_time_monitoring(self):
         threading.Thread(target=self.update_ui, daemon=True).start()
