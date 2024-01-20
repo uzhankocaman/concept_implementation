@@ -1,5 +1,6 @@
 import pandas as pd
-import logging 
+import logging
+
 
 class DataAcquisition:
     def __init__(self):
@@ -11,8 +12,12 @@ class DataAcquisition:
         """
         logging.info("Acquiring data...")
         try:
-            data = pd.DataFrame(next(sensor_data_generator), index=[len(self.accumulated_data)])
-            self.accumulated_data = self.accumulated_data._append(data, ignore_index=True)
+            data = pd.DataFrame(
+                next(sensor_data_generator), index=[len(self.accumulated_data)]
+            )
+            self.accumulated_data = self.accumulated_data._append(
+                data, ignore_index=True
+            )
             return data
         except StopIteration:
             return None
@@ -22,4 +27,3 @@ class DataAcquisition:
         Gets all accumulated data
         """
         return self.accumulated_data
-    

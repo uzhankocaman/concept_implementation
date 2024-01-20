@@ -1,7 +1,8 @@
 import pandas as pd
 import logging
 
-#TODO: if no fault (and event) is detected, no report is generated. 
+
+# TODO: if no fault (and event) is detected, no report is generated.
 #      instead, generate a report that indicates a good state
 class FaultDiagnostics:
     def __init__(self, report_callback):
@@ -24,15 +25,19 @@ class FaultDiagnostics:
         return self.idle_state_fault
 
     def diagnostic_state(self, data):
-        if self.fault_detection(data): # empty dataframe returns when no fault detected.
+        if self.fault_detection(
+            data
+        ):  # empty dataframe returns when no fault detected.
             return self.fault_processing_state
         return self.idle_state_fault
 
     def fault_processing_state(self, data):
         fault_time = self.alarm(data)
         fault_location = self.fault_isolation(data)
-        fault_severity = self.fault_identification(data)    
-        return lambda _: self.assessment_state_fault(data, fault_time, fault_location, fault_severity)
+        fault_severity = self.fault_identification(data)
+        return lambda _: self.assessment_state_fault(
+            data, fault_time, fault_location, fault_severity
+        )
 
     def assessment_state_fault(self, data, fault_time, fault_location, fault_severity):
         report = self.report_generate(data, fault_time, fault_location, fault_severity)
@@ -49,7 +54,7 @@ class FaultDiagnostics:
         """
         check if data exceeds/deceeds certain threshold
         """
-        return True # data["MaschineStatus.DieselFuellstand"].values < 9999
+        return True  # data["MaschineStatus.DieselFuellstand"].values < 9999
 
     def alarm(self, data):
         # alarm/notification
@@ -57,7 +62,10 @@ class FaultDiagnostics:
         return {"fault_time": "11/13/2023 17:39"}
 
     def fault_isolation(self, data):
-        return {"fault_location": "Diesel Fuellstand", "fault_value": data["MaschineStatus.DieselFuellstand"]}
+        return {
+            "fault_location": "Diesel Fuellstand",
+            "fault_value": data["MaschineStatus.DieselFuellstand"],
+        }
 
     def fault_identification(self, data):
         return {"fault_severity": "Level 4/5"}
@@ -66,7 +74,7 @@ class FaultDiagnostics:
         """
         Generate a report based on the fault information
         """
-        report = fault_time | fault_location | fault_severity 
+        report = fault_time | fault_location | fault_severity
         return data.assign(**report)
 
     def report_send(self, report):
@@ -74,4 +82,3 @@ class FaultDiagnostics:
         Send the report to the health management system.
         """
         self.report_callback(report)
-

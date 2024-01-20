@@ -1,5 +1,5 @@
-#TODO: state transition
-#TODO: report generation
+# TODO: state transition
+# TODO: report generation
 class Prognostics:
     def __init__(self, report_callback):
         self.current_state = self.prognostic_state
@@ -40,7 +40,7 @@ class Prognostics:
 
     def predict_degradation_trend(self, data):
         degradation_trend = "test"
-        trend_analysis_result = True  
+        trend_analysis_result = True
         return degradation_trend, trend_analysis_result
 
     def estimate_rul(self, degradation_trend):
@@ -61,5 +61,3 @@ class Prognostics:
         """
         if self.report_callback:
             self.report_callback(report)
-
-

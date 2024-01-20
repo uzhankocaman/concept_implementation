@@ -1,6 +1,7 @@
 import pandas as pd
 import logging
 
+
 class HealthManagement:
     def __init__(self, report_callback):
         self.reports = pd.DataFrame()
@@ -22,11 +23,10 @@ class HealthManagement:
         if not self.reports.empty:
             self.__generate_advisory()
             self.__send_advisory()
-            self.reports = pd.DataFrame() # Clear the list after processing
+            self.reports = pd.DataFrame()  # Clear the list after processing
         else:
             print("No reports to process.")
 
-        
     def __generate_advisory(self):
         self.reports["Advisory"] = "Change Battery"
 

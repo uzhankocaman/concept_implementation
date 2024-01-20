@@ -3572,3 +3572,19 @@
 2024-01-12 23:20:52,937 - INFO - [ForestML 4.0] Demo Harvester: Current value: 113.59999999999782
 2024-01-12 23:20:55,387 - ERROR - [ForestML 4.0] Demo Harvester: [S3I][Repository]: jwt signature verification failed: 'exp' claim expired at Fri, 12 Jan 2024 13:21:31 GMT
  and reconnect in 5 seconds
+2024-01-20 17:25:51,412 - INFO - [ForestML 4.0] Demo Harvester: Start the thing identified as s3i:c2c713c4-910f-405f-86af-e2ce67f6bea5 and named as Demo Harvester
+2024-01-20 17:25:51,537 - INFO - [ForestML 4.0] Demo Harvester: Implementation object is added into the functionality fml40::AcceptsFellingJobs
+2024-01-20 17:25:51,537 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.1
+2024-01-20 17:25:52,498 - INFO - [ForestML 4.0] Demo Harvester: [S3I][IdentityProvider]: Connection built
+2024-01-20 17:25:52,499 - INFO - [ForestML 4.0] Demo Harvester: [S3I][IdentityProvider]: Access Token granted
+2024-01-20 17:25:52,499 - INFO - [ForestML 4.0] Demo Harvester: [S3I][Config]: Connection built
+2024-01-20 17:25:53,114 - INFO - [ForestML 4.0] Demo Harvester: [S3I][Directory]: Connection built
+2024-01-20 17:25:53,114 - INFO - [ForestML 4.0] Demo Harvester: [S3I][EventSystem]: Setup event system
+2024-01-20 17:25:53,646 - INFO - [ForestML 4.0] Demo Harvester: [S3I][EventBroker]: Connection built via AMQP
+2024-01-20 17:25:54,977 - INFO - [ForestML 4.0] Demo Harvester: [S3I][Repository]: Connection built
+2024-01-20 17:25:55,183 - INFO - [ForestML 4.0] Demo Harvester: [S3I][Broker]: Connection built via AMQP
+2024-01-20 17:26:02,026 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.2
+2024-01-20 17:26:12,060 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.30000000000000004
+2024-01-20 17:26:22,108 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.4
+2024-01-20 17:26:32,148 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.5
+2024-01-20 17:26:42,199 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.6
