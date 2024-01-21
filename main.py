@@ -19,8 +19,9 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    mms = MaintenanceManagementService()
-    mms.run()
+    # mms = MaintenanceManagementService()
+    # mms.run()
+    
     # def handle_report(report):
     #     health_management.receive_report(report)
 

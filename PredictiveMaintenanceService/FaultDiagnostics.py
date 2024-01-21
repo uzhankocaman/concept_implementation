@@ -1,13 +1,27 @@
 import pandas as pd
 import logging
+from DataProcessing import DataProcessing
+from StateAdaptation import StateAdaptation
 
+
+# from PredictiveMaintenanceService.observer_pattern import Event, Observer
+from observer_pattern import Event, Observer
 
 # TODO: if no fault (and event) is detected, no report is generated.
 #      instead, generate a report that indicates a good state
-class FaultDiagnostics:
+def handle_report(report):
+    pass
+    
+class FaultDiagnostic(Observer):
     def __init__(self, report_callback):
         self.current_state = self.idle_state_fault
         self.report_callback = report_callback
+
+    def handle_event(self, data):
+        print("Received data:", data)
+        # Handle the assessed data...
+        print("FFFFFFFFFFFFFFf")
+        # self.run()
 
     def run(self, data):
         """
@@ -82,3 +96,13 @@ class FaultDiagnostics:
         Send the report to the health management system.
         """
         self.report_callback(report)
+
+
+data_processor = DataProcessing()
+state_adaptation = StateAdaptation()
+fault_diagnostic = FaultDiagnostic(handle_report)
+
+data_processor.on_data_processed.subscribe(state_adaptation)
+state_adaptation.on_state_assessed.subscribe(fault_diagnostic)
+
+data_processor.process_data('battery')

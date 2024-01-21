@@ -1,6 +1,9 @@
 # TODO: state transition
 # TODO: report generation
-class Prognostics:
+
+from PredictiveMaintenanceService.observer_pattern import Event, Observer
+
+class Prognostics(Observer):
     def __init__(self, report_callback):
         self.current_state = self.prognostic_state
         self.report_callback = report_callback
