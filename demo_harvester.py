@@ -3,33 +3,234 @@ from ml.fml40.features.functionalities.accepts_felling_jobs import AcceptsFellin
 import asyncio
 import argparse
 
-from MaintenanceManagementService.MaintenanceManagementSystem import (
-    MaintenanceManagementService,
-)
+# from MaintenanceManagementService.MaintenanceManagementSystem import (
+#     MaintenanceManagementService,
+# )
 
+# self.entry.features["ml40::Composite"].targets["Diesel Engine"].features["ml40::Composite"].targets["Fuel"].features["ml40::Pressure"].pressure
 """
 Serializes the DT modeling conform to ForestML 4.0.
 """
 harvester_fml40_json = {
-    "thingId": "",
-    "policyId": "",
-    "attributes": {
-        "class": "ml40::Thing",
-        "name": "Demo Harvester",
-        "features": [
-            {"class": "fml40::AcceptsFellingJobs"},
-            {"class": "ml40::OperatingHours", "total": 0},
+  "thingId": "",
+  "policyId": "",
+  "attributes": {
+    "class": "ml40::Thing",
+    "name": "Maintenance Analysis Harvester",
+    "roles": [
+      {
+        "class": "fml40::Harvester"
+      }
+    ],
+    "features": 
+    [
+        {
+        "class": "ml40::Composite",
+        "targets": [
             {
-                "class": "ml40::Location",
-                "longitude": 0,
-                "latitude": 0,
-                "orientation": 0,
+                "class": "ml40::Thing",
+                "name": "Diesel Engine",
+                "roles": [
+                    {
+                        "class": "ml40::Engine"
+                    }
+                ],
+                "features": 
+                [
+                    {
+                        "class": "ml40::Composite",
+                        "targets": 
+                        [
+                            {
+                                "class": "ml40:Thing",
+                                "name": "Fuel",
+                                "roles": 
+                                [
+                                    {
+                                        "class": "ml40::PressureSensor"
+                                    },
+                                ],
+                                "features": 
+                                [
+                                    {
+                                        "class": "ml40::Pressure",
+                                        "pressure": 0
+                                    },
+                                ]
+                            },
+                            {
+                                "class": "ml40:Thing",
+                                "name": "Battery",
+                                "roles": 
+                                [
+                                    {
+                                        "class": "ml40::PressureSensor"
+                                    },
+                                ],
+                                "features": 
+                                [
+                                    {
+                                        "class": "ml40::Pressure",
+                                        "voltage": 0
+                                    },
+                                ]
+                            },
+                            # {
+                            #     "class": "ml40::Thing",
+                            #     "name": "Battery",
+                            #     "roles": 
+                            #     [
+                            #         {
+                            #             "class": "fml40::Battery"
+                            #         },
+                            #     ],
+                            #     "features": 
+                            #     [
+                            #         {
+                            #         "class": "fml40::Battery",
+                            #         # "voltage": 0,
+                            #         # "maintenanceSchedule": "",
+                            #         # "lastMaintenanceDate": ""
+                            #         }
+                            #     ]
+                            # },
+                        ]
+                    },
+                    {
+                        "class": "ml40::RotationalSpeed",
+                        "rpm": 0
+                    },
+                    {
+                        "class": "ml40::Temperature",
+                        "temperature": 0
+                    },
+                    {
+                        "class": "ml40::CurrentLoad",
+                        "load": 0
+                    },
+                    {
+                        "class": "ml40::MachineOperatingStatus",
+                        "status": ""
+                    },
+                ]
             },
-        ],
-    },
+            ]
+        },
+        {
+        "class": "ml40::ProvidesMachineData",
+        "Bat_Volt": 0,
+        "Oil_Temp":	0,
+        "Cool_Temp": 0,	
+        "FuelPressure": 0,	
+        "Engine_Load": 0,
+        "RPM_Diesel": 0
+        },
+        {
+        "class": "ml40::OperatingHours",
+        "total": 0
+        },
+    ]
+  }
 }
 
 
+# # Other
+# {
+#     "class": "ml40::ProvidesMachineData",
+# },
+# {
+#     "class": "ml40::OperatingHours",
+#     "total": 0
+# },
+
+# # Engine
+# {
+#     "class": "ml40::Thing",
+#     "name": "Diesel Engine",
+#     "roles": [
+#         {
+#             "class": "ml40::Engine"
+#         }
+#     ],
+#     "features": [
+#         {
+#             "class": "ml40::RotationalSpeed",
+#             "rpm": 0
+#         },
+#         {
+#             "class": "ml40::Temperature",
+#             "temperature": 0
+#         },
+#         {
+#             "class": "ml40::EngineLoad",
+#             "load": 0
+#         },
+#         {
+#             "class": "ml40::Battery",
+#             "voltage": 0,
+#             "maintenanceSchedule": "",
+#             "lastMaintenanceDate": ""
+#         },
+#         {
+#         "class": "ml40:Thing",
+#         "name": "Fuel",
+#         "roles": [
+#             {
+#                 "class": "ml40::PressureSensor"
+#             }
+#         ],
+#         "features": [
+#             {
+#                 "class": "ml40::Pressure",
+#                 "pressure": 0
+#             }
+#         ]
+#         },
+#         {
+#             "class": "ml40::MachineOperatingStatus",
+#             "status": ""
+#         },
+#     ]
+# }
+
+# {
+#             "class": "ml40::FuelFilter",
+#             "fuelPressure": 0,
+#             "maintenanceSchedule": "",
+#             "lastMaintenanceDate": ""
+        #   },
+
+
+# {
+#             "class": "ml40::Pressure",
+#             "pressure": 0
+#           },
+###
+###
+# {
+#     "class": "ml40::FuelConsumption",
+#     "currentConsumption": 0,
+#     "meanConsumption": 0
+# },
+# ###
+# {
+# "class": "ml40::PredictsMaintenance",
+# },
+# {
+# "class": "ml40::MaintenanceManagementService",
+# },
+# {
+# "class": "ml40::DataProviderService",
+# },
+
+# {
+#             "class": "ml40::FuelFilter",
+#             "fuelPressure": 0,
+#             "maintenanceSchedule": "",
+#             "lastMaintenanceDate": ""
+# },
+
+# Implementation object is added into the functionality fml40::AcceptsFellingJobs
 class AcceptsFellingJobsImpl(AcceptsFellingJobs):
     """
     Reference implements a fml40 feature (fml40::AcceptsFellingJob)
@@ -106,9 +307,11 @@ class DemoHarvester(Thing):
         operating_hours = self.entry.features["ml40::OperatingHours"]
         operating_hours.total += 0.1
         APP_LOGGER.info("Current value: {}".format(operating_hours.total))
-        mms = MaintenanceManagementService()
-        mms.run()
+        # mms = MaintenanceManagementService()
+        # mms.run()
         self.loop.call_later(10, self.simulate_operating_hours)
+
+        
 
     def recursively_send_named_event(self):
         """
@@ -129,7 +332,7 @@ class DemoHarvester(Thing):
         """
         Defines the run function, adds callback functions and start the event loop in a persistent module.
         """
-
+        print("run")
         self.add_ml40_implementation(
             AcceptsFellingJobsImpl, "fml40::AcceptsFellingJobs"
         )
