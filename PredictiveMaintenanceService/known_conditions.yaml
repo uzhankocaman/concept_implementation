@@ -1,0 +1,4 @@
+battery:
+  battery_disconnected: -0.1 <= x <= 0.1
+  engine_not_running: 22 <= x <= 25
+  engine_running: 25 <= x <= 28.5

@@ -1,28 +1,28 @@
 import pandas as pd
 from observer_pattern import Event, Observer
+import yaml
 
 class StateAdaptation(Observer):
     def __init__(self):
-        self.known_conditions = {
-            "battery": {
-                'battery_disconnected': lambda x: -0.1 <= x <= 0.1,
-                'engine_not_running': lambda x: 23.5 <= x <= 24.5,
-                'engine_start': lambda x: x == 24,
-                'engine_running': lambda x: 27.5 <= x <= 30
-            }
-            # Add more categories and their conditions here as a dictionary element in the dictionary
-        }
         self.configuration_setting = None
         self.threshold_parameters = {}  # Adaptive threshold parameters
         self.processed_data = pd.Series()
-        self.last_value = None
         self.category = None
         self.operational_condition = None
         self.model = None
         self.value = None
-
         self.on_state_assessed = Event()
-        
+        self.known_conditions = {
+            "battery": {}
+        }
+        self.load_known_conditions()
+
+    def load_known_conditions(self):
+        with open('C://Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/PredictiveMaintenanceService/known_conditions.yaml', 'r') as file:
+            conditions = yaml.safe_load(file)
+        for condition, expression in conditions['battery'].items():
+            self.known_conditions['battery'][condition] = eval(f"lambda x: {expression}")
+
     def run(self):
         # Start with aligning sensor data with machine configuration
         self.align_data_with_configuration(self.processed_data)
@@ -60,6 +60,7 @@ class StateAdaptation(Observer):
         print(f"Setting configuration for condition: {self.operational_condition}")
         self.configuration_setting = {"data_type": self.category, "operational_condition": self.operational_condition, "model": self.model}
         self.processed_data["configuration"] = self.configuration_setting
+
     def align_data_with_configuration(self, data):
         # Based on the incoming data, determine which configuration steps to be taken
         dict = {"battery": "scale_value_Bat_Volt"}

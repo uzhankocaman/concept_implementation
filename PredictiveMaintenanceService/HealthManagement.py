@@ -1,6 +1,8 @@
 import pandas as pd
 import logging
 
+# {'health_status': False, 'fault_time': datetime.datetime(2024, 1, 22, 8, 25, 2, 524487), 'fault_location': 'battery', 'fault_severity': 1.0}
+# {'health_status': True}
 
 class HealthManagement:
     def __init__(self, report_callback):

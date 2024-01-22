@@ -1,66 +1,88 @@
-# TODO: state transition
-# TODO: report generation
+from datetime import datetime 
+from observer_pattern import Event, Observer
 
-from PredictiveMaintenanceService.observer_pattern import Event, Observer
-
+#done
 class Prognostics(Observer):
-    def __init__(self, report_callback):
-        self.current_state = self.prognostic_state
-        self.report_callback = report_callback
+    def __init__(self):
+        self.current_state = self.check_model_state
+        self.report_callback = None
+        self.data = None
 
-    def run(self, data):
+    def handle_event(self, data):
+        self.data = data
+        self.run()
+
+    def run(self):
         """
-        executes the state state transition
+        Executes the state transition.
         """
-        self.current_state = self.current_state(data)
-        while True:
-            self.current_state = self.current_state(data)
-            if self.current_state == self.idle_state_fault:
+        data = self.data
+        max_iterations = 100
+        for _ in range(max_iterations):
+            new_state = self.current_state(data)
+            if new_state is None or new_state == self.current_state:
                 break
-        return self.current_state
+            self.current_state = new_state
 
-    # def idle_state(self, data):
-    #     if self.time_cycle_due():
-    #         return self.prognostic_state
-    #     return self.idle_state
+    def check_model_state(self, data):
+        """
+        Check if the model exists to process the data.
+        """
+        if self.is_model():
+            return self.detect_degradation_state
+        return None  # Terminate if no model is available
 
-    def prognostic_state(self, data):
-        degradation_trend, trend_analysis_result = self.predict_degradation_trend(data)
-        if trend_analysis_result:
-            return lambda _: self.rul_predict_state(degradation_trend)
-        else:
-            return self.assessment_state
+    def detect_degradation_state(self, data):
+        """
+        Detect degradation.
+        """
+        if self.is_degradation(data):
+            return self.predict_rul_state
+        return self.assess_system_health_state 
 
-    def rul_predict_state(self, degradation_trend):
-        rul = self.estimate_rul(degradation_trend)
-        return lambda _: self.assessment_state(rul)
+    def predict_rul_state(self, data):
+        """
+        Predict the Remaining Useful Life (RUL) of the system.
+        """
+        rul = self.estimate_rul(data)
+        self.rul = rul  
+        return self.assess_system_health_state
 
-    def assessment_state(self, rul):
-        health_status = self.analyze_health_status(rul)
-        report = self.report_generate(health_status)
+    def assess_system_health_state(self, data):
+        """
+        Assess the overall system health based on RUL stored from the previous state.
+        """
+        report = self.report_generate(data)
         self.report_send(report)
-        return self.idle_state
+        return None #End
 
-    def predict_degradation_trend(self, data):
-        degradation_trend = "test"
-        trend_analysis_result = True
-        return degradation_trend, trend_analysis_result
+    def is_model(self):
+        return False
 
-    def estimate_rul(self, degradation_trend):
-        return 100
+    def is_degradation(self, data):
+        pass
+
+    def estimate_rul(self, data):
+        pass
 
     def analyze_health_status(self, rul):
-        return "Good"
+        pass
 
     def report_generate(self, health_status):
-        """
-        Generate a report based on the prognostics information
-        """
-        return 0
+        pass
 
     def report_send(self, report):
+        pass
+
+    def load_model(self):
         """
-        Send the report to the health management system.
+        Load the predictive model.
         """
-        if self.report_callback:
-            self.report_callback(report)
+        self.model_last_updated = datetime.now()
+
+    def update_model(self):
+        """
+        Update the predictive model from an external source.
+        """
+        self.model_last_updated = datetime.now()
+

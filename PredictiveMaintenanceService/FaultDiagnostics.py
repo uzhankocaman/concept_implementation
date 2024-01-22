@@ -1,108 +1,154 @@
 import pandas as pd
 import logging
+import yaml
 from DataProcessing import DataProcessing
 from StateAdaptation import StateAdaptation
-
-
+from Prognostics import Prognostics
 # from PredictiveMaintenanceService.observer_pattern import Event, Observer
 from observer_pattern import Event, Observer
+from datetime import datetime
 
-# TODO: if no fault (and event) is detected, no report is generated.
-#      instead, generate a report that indicates a good state
-def handle_report(report):
-    pass
-    
+#done
 class FaultDiagnostic(Observer):
-    def __init__(self, report_callback):
+    def __init__(self):
         self.current_state = self.idle_state_fault
-        self.report_callback = report_callback
+        self.fault_state_assessed = Event()
+        self.data = None
+        self.load_model_params()
+        self.model_deployed = None
+        self.models = {
+            "battery": {"soc": self.calculate_soc, "soh": self.calculate_soh},
+        }
+        self.model_metric = {"battery": {"soc": 10, "soh": 90}} 
+        
+    def load_model_params(self):
+        # Load the parameters
+        with open('C://Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/PredictiveMaintenanceService/model_params.yaml', 'r') as file:
+            self.model_params = yaml.safe_load(file)
+
+    def calculate_soc(self):
+        """
+        Calculate the State of Charge (SoC) of the battery.
+        """
+        params = self.model_params[self.data["configuration"]["data_type"]][self.data["configuration"]["operational_condition"]]
+        Vmin = params['Vmin']
+        Vmax = params['Vmax']
+        SoC = abs(((self.data["scale_value_Bat_Volt"] - Vmin) / (Vmax - Vmin))) * 100 # normally you would have to define the measure of interest 'scaled_Bat_Volt' somewhere else.
+        return SoC
+    
+    def calculate_soh(self):
+        """
+        Calculate the State of Health (SoH) of the battery.
+        """
+        params = self.model_params[self.data["configuration"]["data_type"]][self.data["configuration"]["operational_condition"]]
+        Vfull_original = params['Vfull_original']
+        SoC = abs(((self.data["health_Bat_Volt"]) / (Vfull_original))) * 100 
+        return SoC
 
     def handle_event(self, data):
-        print("Received data:", data)
-        # Handle the assessed data...
-        print("FFFFFFFFFFFFFFf")
-        # self.run()
+        self.data = data
+        self.run()
+        self.fault_state_assessed.emit(self.data)
 
-    def run(self, data):
+    def run(self):
         """
-        executes the state transition
+        Executes the state transition loop.
         """
-        logging.info("Fault Diagnostics...")
-        while True:
-            self.current_state = self.current_state(data)
-            if self.current_state == self.idle_state_fault:
-                break
+        logging.info("Fault Diagnostics initialized...")
+        while self.current_state is not None:
+            self.current_state = self.current_state()
 
-    def idle_state_fault(self, data):
-        if self.event_detected(data):
-            return self.diagnostic_state
+        self.fault_state_assessed.emit(self.data["fault_processing_report"])
+
+    def idle_state_fault(self):
+        if self.isModel():
+            return self.deploy_model
         return self.idle_state_fault
 
-    def diagnostic_state(self, data):
-        if self.fault_detection(
-            data
-        ):  # empty dataframe returns when no fault detected.
-            return self.fault_processing_state
-        return self.idle_state_fault
+    def deploy_model(self):
+        logging.info("Model deployed.")
+        self.model_deployed = list(self.models[self.data["configuration"]["data_type"]].values())[0]
+        return self.diagnostic_state
 
-    def fault_processing_state(self, data):
-        fault_time = self.alarm(data)
-        fault_location = self.fault_isolation(data)
-        fault_severity = self.fault_identification(data)
-        return lambda _: self.assessment_state_fault(
-            data, fault_time, fault_location, fault_severity
-        )
+    def diagnostic_state(self):
+        if self.isHealth():
+            return self.assessment_state
+        elif ~self.isHealth():
+            return self.fault_processing
+        return None
 
-    def assessment_state_fault(self, data, fault_time, fault_location, fault_severity):
-        report = self.report_generate(data, fault_time, fault_location, fault_severity)
-        self.report_send(report)
-        return self.idle_state_fault
+    def fault_processing(self):
+        if self.isFatal():
+            self.failure_alarm()
+        if self.isProcessed():
+            return self.assessment_state
+        return None
+    
+    def assessment_state(self):
+        if self.isReport():
+            return None
+        return None
 
-    def event_detected(self, data):
-        """
-        check if data is available
-        """
-        return data is not None
+    def failure_alarm(self):
+        logging.error("Fatal fault detected! Triggering alarm.")
+        print("Alarm.")
 
-    def fault_detection(self, data):
-        """
-        check if data exceeds/deceeds certain threshold
-        """
-        return True  # data["MaschineStatus.DieselFuellstand"].values < 9999
+    def generate_and_send_assessment_report(self):
+        logging.info(f"Assessment report generated and sent for data: {self.data}")
+        if self.data["health_status"]:
+            self.data["fault_processing_report"] = {"health_status": self.data["health_status"]}
+            return True
+        else: 
+            self.data["fault_processing_report"] = self.data["fault_processed"]
+            return True
 
-    def alarm(self, data):
-        # alarm/notification
-        print("Fault detected!")
-        return {"fault_time": "11/13/2023 17:39"}
+    def isModel(self):
+        return self.models[self.data["configuration"]["data_type"]]
 
-    def fault_isolation(self, data):
+    def isHealth(self):
+        self.data["health"] = self.model_deployed()
+        self.data["health_status"] = list(self.model_metric[self.data["configuration"]["data_type"]].values())[0] < self.data["health"]
+        return self.data["health_status"]
+        
+    def isFatal(self):
+        # Determine if the anomaly is fatal
+        return False
+
+    def isProcessed(self):
+        self.data["fault_processed"] = self.process_fault()
+        return True
+
+    def process_fault(self):
         return {
-            "fault_location": "Diesel Fuellstand",
-            "fault_value": data["MaschineStatus.DieselFuellstand"],
+            "health_status": self.data["health_status"],
+            "fault_time": datetime.now(),
+            "fault_location": self.data["configuration"]["data_type"],
+            "fault_severity": self.calc_severity()
         }
+    
+    def calc_severity(self):
+        """ Calculate the severity rating """
+        if not 0 <= self.data["health"] <= 100:
+            raise ValueError("error.")
+        severity = 5 - self.data["health"] // 20
+        return severity
 
-    def fault_identification(self, data):
-        return {"fault_severity": "Level 4/5"}
+    def isReport(self):
+        if self.generate_and_send_assessment_report():
+            return True
+        else:
+            self.isReport()
 
-    def report_generate(self, data, fault_time, fault_location, fault_severity):
-        """
-        Generate a report based on the fault information
-        """
-        report = fault_time | fault_location | fault_severity
-        return data.assign(**report)
-
-    def report_send(self, report):
-        """
-        Send the report to the health management system.
-        """
-        self.report_callback(report)
-
-
+    def get_data(self):
+        return self.data
+    
 data_processor = DataProcessing()
 state_adaptation = StateAdaptation()
-fault_diagnostic = FaultDiagnostic(handle_report)
+fault_diagnostic = FaultDiagnostic()
+prognostic = Prognostics()
 
 data_processor.on_data_processed.subscribe(state_adaptation)
 state_adaptation.on_state_assessed.subscribe(fault_diagnostic)
+state_adaptation.on_state_assessed.subscribe(prognostic)
 
 data_processor.process_data('battery')
