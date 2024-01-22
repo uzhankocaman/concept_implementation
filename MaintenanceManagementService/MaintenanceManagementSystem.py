@@ -127,7 +127,7 @@ class InventoryManager:
         return arrival_date
 
 
-class MaintenanceManagementService:
+class MaintenanceManagementService():
     def __init__(self):
         self.initialize_database()
         self.load_state()

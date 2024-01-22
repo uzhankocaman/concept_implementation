@@ -1,12 +1,15 @@
 from datetime import datetime 
 from observer_pattern import Event, Observer
+import time
 
 #done
 class Prognostics(Observer):
     def __init__(self):
+        super().__init__()
         self.current_state = self.check_model_state
         self.report_callback = None
         self.data = None
+        self.prognostic_state_assessed = Event()
 
     def handle_event(self, data):
         self.data = data
@@ -23,6 +26,8 @@ class Prognostics(Observer):
             if new_state is None or new_state == self.current_state:
                 break
             self.current_state = new_state
+        self.data["prognostics_report"] = {"prognostic_status": "model_not_found"}
+        self.prognostic_state_assessed.emit(self.data["prognostics_report"])
 
     def check_model_state(self, data):
         """
@@ -57,6 +62,7 @@ class Prognostics(Observer):
         return None #End
 
     def is_model(self):
+        time.sleep(0.1)
         return False
 
     def is_degradation(self, data):

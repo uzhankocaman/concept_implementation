@@ -4,6 +4,7 @@ import yaml
 
 class StateAdaptation(Observer):
     def __init__(self):
+        super().__init__()
         self.configuration_setting = None
         self.threshold_parameters = {}  # Adaptive threshold parameters
         self.processed_data = pd.Series()
