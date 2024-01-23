@@ -9,7 +9,7 @@ from sklearn.impute import SimpleImputer
 from scipy.stats import zscore
 import numpy as np
 
-from observer_pattern import Event, Observer
+from utilities.observer_pattern import Event, Observer
 
 class DataProcessing:
     def __init__(self, file_path='PredictiveMaintenanceService/test.xlsx'):

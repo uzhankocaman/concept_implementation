@@ -3,12 +3,14 @@ from ml.ml40.features.functionalities.provides_machine_data import ProvidesMachi
 import asyncio
 import argparse
 import yaml
-
+from DataProviderService.dps import DataProviderService
+from utilities.observer_pattern import Event, Observer
 # from MaintenanceManagementService.MaintenanceManagementSystem import (
 #     MaintenanceManagementService,
 # )
 
 # self.entry.features["ml40::Composite"].targets["Diesel Engine"].features["ml40::Composite"].targets["Fuel"].features["ml40::Pressure"].pressure
+# self.entry.features["ml40::ProvidesMachineData"]
 """
 Serializes the DT modeling conform to ForestML 4.0.
 """
@@ -119,14 +121,6 @@ harvester_fml40_json = {
   }
 }
 
-class ProvidesMachineDataImpl(ProvidesMachineData):
-    def __init__(self, name="", identifier=""):
-        super(ProvidesMachineData, self).__init__(name=name, identifier=identifier)
-
-    def getMachineData(self): #inherited from ProvidesMachineData
-        return 
-
-
 class DemoHarvester(Thing):
     """
     Defines demo harvester
@@ -184,8 +178,8 @@ class DemoHarvester(Thing):
         operating_hours = self.entry.features["ml40::OperatingHours"]
         operating_hours.total += 0.1
         APP_LOGGER.info("Current value: {}".format(operating_hours.total))
-        result = self.entry.features["ml40::ProvidesMachineData"].getMachineData()
-        print(result)
+        # result = self.entry.features["ml40::ProvidesMachineData"].getMachineData()
+        # print(result)
         # mms = MaintenanceManagementService()
         # mms.run()
         self.loop.call_later(10, self.simulate_operating_hours)
@@ -209,9 +203,8 @@ class DemoHarvester(Thing):
         """
         Defines the run function, adds callback functions and start the event loop in a persistent module.
         """
-        print("run")
         self.add_ml40_implementation(
-            ProvidesMachineDataImpl, "ml40::ProvidesMachineData"
+            DataProviderService, "ml40::ProvidesMachineData"
         )
         self.add_on_thing_start_ok_callback(self.simulate_operating_hours, True, False)
         self.connector.add_on_event_system_start_ok_callback(
@@ -239,3 +232,5 @@ if __name__ == "__main__":
         oauth2_secret=oauth2_secret,
     )
     har.run()
+
+# DataProviderService()

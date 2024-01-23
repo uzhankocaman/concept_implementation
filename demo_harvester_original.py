@@ -39,7 +39,7 @@ class AcceptsFellingJobsImpl(AcceptsFellingJobs):
         super(AcceptsFellingJobs, self).__init__(name=name, identifier=identifier)
         print("init")
 
-    def acceptJob(self, job):
+    async def acceptJob(self, job):
         """
         Implementation logic for how to accept a felling job
 
@@ -112,8 +112,6 @@ class DemoHarvester(Thing):
         print(result)
         self.loop.call_later(10, self.simulate_operating_hours)
 
-        
-
     def recursively_send_named_event(self):
         """
         Recursively sends named event (update of ml40::OperationHours) every 10 seconds.
@@ -133,6 +131,7 @@ class DemoHarvester(Thing):
         """
         Defines the run function, adds callback functions and start the event loop in a persistent module.
         """
+
         self.add_ml40_implementation(
             AcceptsFellingJobsImpl, "fml40::AcceptsFellingJobs"
         )
