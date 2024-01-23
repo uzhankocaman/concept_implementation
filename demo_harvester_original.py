@@ -3,10 +3,6 @@ from ml.fml40.features.functionalities.accepts_felling_jobs import AcceptsFellin
 import asyncio
 import argparse
 
-# from MaintenanceManagementService.MaintenanceManagementSystem import (
-#     MaintenanceManagementService,
-# )
-
 """
 Serializes the DT modeling conform to ForestML 4.0.
 """
@@ -17,16 +13,21 @@ harvester_fml40_json = {
         "class": "ml40::Thing",
         "name": "Demo Harvester",
         "features": [
-            {"class": "fml40::AcceptsFellingJobs"},
-            {"class": "ml40::OperatingHours", "total": 0},
+            {
+                "class": "fml40::AcceptsFellingJobs"
+            },
+            {
+                "class": "ml40::OperatingHours",
+                "total": 0
+            },
             {
                 "class": "ml40::Location",
                 "longitude": 0,
                 "latitude": 0,
-                "orientation": 0,
-            },
-        ],
-    },
+                "orientation": 0
+            }
+        ]
+    }
 }
 
 
@@ -34,10 +35,10 @@ class AcceptsFellingJobsImpl(AcceptsFellingJobs):
     """
     Reference implements a fml40 feature (fml40::AcceptsFellingJob)
     """
-
     def __init__(self, name="", identifier=""):
-        super(AcceptsFellingJobs, self).__init__(name=name, identifier=identifier)
-        print("init")
+        super(AcceptsFellingJobs, self).__init__(
+            name=name,
+            identifier=identifier)
 
     async def acceptJob(self, job):
         """
@@ -54,7 +55,6 @@ class DemoHarvester(Thing):
     """
     Defines demo harvester
     """
-
     def __init__(self, oauth2_id, oauth2_secret):
         """
         Initializes demo havester
@@ -81,7 +81,9 @@ class DemoHarvester(Thing):
         """
         Specifies the used parameter for S3I connection
         """
-        parameter = S3IParameter(repo_sync_freq=0.01)
+        parameter = S3IParameter(
+            repo_sync_freq=0.01
+        )
 
         """
         Instantiates an connector class 
@@ -94,37 +96,38 @@ class DemoHarvester(Thing):
             is_broker=True,
             dt_entry_ins=entry,
             loop=loop,
-            s3i_parameter=parameter,
+            s3i_parameter=parameter
         )
         setup_logger("Demo Harvester")
-        super(DemoHarvester, self).__init__(loop=loop, entry=entry, connector=connector)
+        super(DemoHarvester, self).__init__(
+            loop=loop,
+            entry=entry,
+            connector=connector
+        )
 
     def simulate_operating_hours(self):
         """
         Recursively increases operating hours every 10 seconds.
+
         """
+        print(self.entry.features["fml40::AcceptsFellingJobs"].acceptJob("test"))
         operating_hours = self.entry.features["ml40::OperatingHours"]
         operating_hours.total += 0.1
         APP_LOGGER.info("Current value: {}".format(operating_hours.total))
-        # mms = MaintenanceManagementService()
-        # mms.run()
-        result = self.entry.features["fml40::AcceptsFellingJobs"].acceptJob("test")
-        print(result)
         self.loop.call_later(10, self.simulate_operating_hours)
 
     def recursively_send_named_event(self):
         """
         Recursively sends named event (update of ml40::OperationHours) every 10 seconds.
+
         """
         current_operating_hours = self.entry.features["ml40::OperatingHours"].total
 
         current_operating_hours = {
             "currentOperatingHours": round(current_operating_hours, 1)
         }
-        self.connector.add_broker_event_message_to_send(
-            "{}.newOperatingHours".format(self.entry.identifier),
-            current_operating_hours,
-        )
+        self.connector.add_broker_event_message_to_send("{}.newOperatingHours".format(self.entry.identifier),
+                                                        current_operating_hours)
         self.loop.call_later(10, self.recursively_send_named_event)
 
     def run(self):
@@ -133,14 +136,19 @@ class DemoHarvester(Thing):
         """
 
         self.add_ml40_implementation(
-            AcceptsFellingJobsImpl, "fml40::AcceptsFellingJobs"
+            AcceptsFellingJobsImpl,
+            "fml40::AcceptsFellingJobs"
         )
-        self.add_on_thing_start_ok_callback(self.simulate_operating_hours, True, False)
+        self.add_on_thing_start_ok_callback(
+            self.simulate_operating_hours, True, False
+        )
         self.connector.add_on_event_system_start_ok_callback(
-            self.recursively_send_named_event, True, False
+            self.recursively_send_named_event,
+            True,
+            False
         )
-        self.run_forever()
 
+        self.run_forever()
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser()

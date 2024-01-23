@@ -9,6 +9,12 @@ import pandas as pd
 import yaml
 import time
 import asyncio 
+import sqlite3
+import pandas as pd
+import sqlite3
+import pandas as pd
+import sqlite3
+import pandas as pd
 
 class PhysicalTwinSimulation:
     def __init__(self):
@@ -16,6 +22,7 @@ class PhysicalTwinSimulation:
         self.config = self.load_config()
         self.db = cantools.database.load_file(self.config['database_path'])
         self.log_files_directory = self.config['log_files_directory']
+        self.connection = self.config['connect']
 
     @staticmethod
     def load_config():
@@ -23,7 +30,8 @@ class PhysicalTwinSimulation:
             return yaml.safe_load(file)
         
     def connect(self):
-        self.access_canbus()
+        if self.connection:
+            self.access_canbus()
 
     def access_canbus(self):
         for file_name in os.listdir(self.log_files_directory):
@@ -96,7 +104,9 @@ class InformationGateway(Observer):
     def __init__(self):
         self.data = None
         self.callback = None
-    
+        self.db_file_path = "C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/can_data_processed_23112023.db"
+        self.conn = sqlite3.connect(self.db_file_path)
+
     def handle_event(self, data):
         self.data = data
         if self.callback:
@@ -108,28 +118,14 @@ class InformationGateway(Observer):
     def get_data(self):
         return self.data
 
+    def read_db(self):
+        for i in range(10000):
+            query = f"SELECT * FROM ProcessedCANData LIMIT 1 OFFSET {i}"
+            df = pd.read_sql_query(query, self.conn)
+            self.callback(df.to_dict('records')[0])
 
-        
-
-#     def store_db(self):
-#         db_file_path = 'can_data.db'
-#         conn = sqlite3.connect(db_file_path)
-#         cursor = conn.cursor()
-
-#         all_keys = set()
-#         for data in transformed_data:
-#             all_keys.update(data.keys())
-
-#         create_table_query = f"CREATE TABLE IF NOT EXISTS CANData ({', '.join([key + ' TEXT' for key in all_keys])})"
-#         cursor.execute(create_table_query)
-
-#         for data in transformed_data:
-#             columns = ', '.join(data.keys())
-#             placeholders = ':' + ', :'.join(data.keys())
-#             insert_query = f"INSERT INTO CANData ({columns}) VALUES ({placeholders})"
-#             cursor.execute(insert_query, data)
-#         conn.commit()
-#         conn.close()
+    def __del__(self):
+        self.conn.close()
 
 class DataProviderService(ProvidesMachineData):
     def __init__(self, name="", identifier=""):
@@ -142,8 +138,16 @@ class DataProviderService(ProvidesMachineData):
         self.information_gateway.register_callback(self.getMachineData)
         self.data_gateway.on_acquisition.subscribe(self.information_gateway)
         self.physical_twin.connect()
+        # self.information_gateway.read_db()
+        self.db_file_path = "C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/can_data_processed_23112023.db"
+        
 
-    async def getMachineData(self, data):
+    async def getMachineData(self, data=None):
+        i = 1
+        self.conn = sqlite3.connect(self.db_file_path)
+        query = f"SELECT * FROM ProcessedCANData LIMIT 1 OFFSET {i}"
+        df = pd.read_sql_query(query, self.conn)
+        data = df.to_dict('records')[0]
         self.MachineData["timestamp"] = data["timestamp"]
         self.MachineData["Supply_Press"] = data["Supply_Press"]
         self.MachineData["RetFilt_Press"] = data["RetFilt_Press"]
@@ -169,10 +173,11 @@ class DataProviderService(ProvidesMachineData):
         self.MachineData["Speed"] = data["Speed"]
         self.MachineData["Steering_Angle"] = data["Steering_Angle"]
         self.MachineData["Drive_Dir"] = data["Drive_Dir"]
-        # print("Received data:", self.MachineData)
-        time.sleep(5)
+        i = i + 1
+        return True
         
 # machine_data_provider = DataProviderService()
 # asyncio.run(machine_data_provider.getMachineData())
 
-# machine_data_provider = DataProviderService()
+machine_data_provider = DataProviderService()
+machine_data_provider.getMachineData()

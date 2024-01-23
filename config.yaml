@@ -1,2 +1,3 @@
 database_path: 'C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/CAN_data/MassCAN_DBC_20231108_SmartForestry.dbc'
 log_files_directory: 'C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/CAN_data/20231123_harvester_can_pcan'
+connect: False

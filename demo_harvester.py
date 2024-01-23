@@ -106,12 +106,6 @@ harvester_fml40_json = {
         },
         {
         "class": "ml40::ProvidesMachineData",
-        "Bat_Volt": 0,
-        "Oil_Temp":	0,
-        "Cool_Temp": 0,	
-        "FuelPressure": 0,	
-        "Engine_Load": 0,
-        "RPM_Diesel": 0
         },
         {
         "class": "ml40::OperatingHours",
@@ -178,8 +172,8 @@ class DemoHarvester(Thing):
         operating_hours = self.entry.features["ml40::OperatingHours"]
         operating_hours.total += 0.1
         APP_LOGGER.info("Current value: {}".format(operating_hours.total))
-        # result = self.entry.features["ml40::ProvidesMachineData"].getMachineData()
-        # print(result)
+        result = self.entry.features["ml40::ProvidesMachineData"].getMachineData()
+        print(result)
         # mms = MaintenanceManagementService()
         # mms.run()
         self.loop.call_later(10, self.simulate_operating_hours)
