@@ -37,8 +37,9 @@ class AcceptsFellingJobsImpl(AcceptsFellingJobs):
 
     def __init__(self, name="", identifier=""):
         super(AcceptsFellingJobs, self).__init__(name=name, identifier=identifier)
+        print("init")
 
-    async def acceptJob(self, job):
+    def acceptJob(self, job):
         """
         Implementation logic for how to accept a felling job
 
@@ -101,13 +102,14 @@ class DemoHarvester(Thing):
     def simulate_operating_hours(self):
         """
         Recursively increases operating hours every 10 seconds.
-
         """
         operating_hours = self.entry.features["ml40::OperatingHours"]
         operating_hours.total += 0.1
         APP_LOGGER.info("Current value: {}".format(operating_hours.total))
         # mms = MaintenanceManagementService()
         # mms.run()
+        result = self.entry.features["fml40::AcceptsFellingJobs"].acceptJob("test")
+        print(result)
         self.loop.call_later(10, self.simulate_operating_hours)
 
         
@@ -131,16 +133,13 @@ class DemoHarvester(Thing):
         """
         Defines the run function, adds callback functions and start the event loop in a persistent module.
         """
-
         self.add_ml40_implementation(
             AcceptsFellingJobsImpl, "fml40::AcceptsFellingJobs"
         )
         self.add_on_thing_start_ok_callback(self.simulate_operating_hours, True, False)
-
         self.connector.add_on_event_system_start_ok_callback(
             self.recursively_send_named_event, True, False
         )
-
         self.run_forever()
 
 

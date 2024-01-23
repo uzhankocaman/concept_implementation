@@ -1,0 +1,117 @@
+# {
+#     "class": "ml40::Thing",
+#     "name": "Battery",
+#     "roles": 
+#     [
+#         {
+#             "class": "fml40::Battery"
+#         },
+#     ],
+#     "features": 
+#     [
+#         {
+#         "class": "fml40::Battery",
+#         # "voltage": 0,
+#         # "maintenanceSchedule": "",
+#         # "lastMaintenanceDate": ""
+#         }
+#     ]
+# },
+
+
+
+# # Other
+# {
+#     "class": "ml40::ProvidesMachineData",
+# },
+# {
+#     "class": "ml40::OperatingHours",
+#     "total": 0
+# },
+
+# # Engine
+# {
+#     "class": "ml40::Thing",
+#     "name": "Diesel Engine",
+#     "roles": [
+#         {
+#             "class": "ml40::Engine"
+#         }
+#     ],
+#     "features": [
+#         {
+#             "class": "ml40::RotationalSpeed",
+#             "rpm": 0
+#         },
+#         {
+#             "class": "ml40::Temperature",
+#             "temperature": 0
+#         },
+#         {
+#             "class": "ml40::EngineLoad",
+#             "load": 0
+#         },
+#         {
+#             "class": "ml40::Battery",
+#             "voltage": 0,
+#             "maintenanceSchedule": "",
+#             "lastMaintenanceDate": ""
+#         },
+#         {
+#         "class": "ml40:Thing",
+#         "name": "Fuel",
+#         "roles": [
+#             {
+#                 "class": "ml40::PressureSensor"
+#             }
+#         ],
+#         "features": [
+#             {
+#                 "class": "ml40::Pressure",
+#                 "pressure": 0
+#             }
+#         ]
+#         },
+#         {
+#             "class": "ml40::MachineOperatingStatus",
+#             "status": ""
+#         },
+#     ]
+# }
+
+# {
+#             "class": "ml40::FuelFilter",
+#             "fuelPressure": 0,
+#             "maintenanceSchedule": "",
+#             "lastMaintenanceDate": ""
+        #   },
+
+
+# {
+#             "class": "ml40::Pressure",
+#             "pressure": 0
+#           },
+###
+###
+# {
+#     "class": "ml40::FuelConsumption",
+#     "currentConsumption": 0,
+#     "meanConsumption": 0
+# },
+# ###
+# {
+# "class": "ml40::PredictsMaintenance",
+# },
+# {
+# "class": "ml40::MaintenanceManagementService",
+# },
+# {
+# "class": "ml40::DataProviderService",
+# },
+
+# {
+#             "class": "ml40::FuelFilter",
+#             "fuelPressure": 0,
+#             "maintenanceSchedule": "",
+#             "lastMaintenanceDate": ""
+# },
