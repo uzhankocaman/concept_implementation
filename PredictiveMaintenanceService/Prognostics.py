@@ -26,7 +26,6 @@ class Prognostics(Observer):
             if new_state is None or new_state == self.current_state:
                 break
             self.current_state = new_state
-        self.data["prognostics_report"] = {"prognostic_status": "model_not_found"}
         self.prognostic_state_assessed.emit(self.data["prognostics_report"])
 
     def check_model_state(self, data):
@@ -35,6 +34,7 @@ class Prognostics(Observer):
         """
         if self.is_model():
             return self.detect_degradation_state
+        self.data["prognostics_report"] = {"prognostic_status": "model_not_found"}
         return None  # Terminate if no model is available
 
     def detect_degradation_state(self, data):

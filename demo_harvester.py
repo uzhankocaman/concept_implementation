@@ -1,5 +1,7 @@
 from ml import build, setup_logger, S3IConnector, Thing, S3IParameter, APP_LOGGER
 from ml.ml40.features.functionalities.provides_machine_data import ProvidesMachineData
+from ml.ml40.features.functionalities.predicts_maintenance import PredictsMaintenance
+from ml.ml40.features.functionalities.manages_maintenance import ManagesMaintenance
 import asyncio
 import argparse
 import yaml
@@ -47,11 +49,11 @@ harvester_fml40_json = {
                         [
                             {
                                 "class": "ml40:Thing",
-                                "name": "Fuel",
+                                "name": "Fuel Filter",
                                 "roles": 
                                 [
                                     {
-                                        "class": "ml40::PressureSensor"
+                                        "class": "ml40::FuelFilter" #FuelFilter
                                     },
                                 ],
                                 "features": 
@@ -74,7 +76,7 @@ harvester_fml40_json = {
                                 "features": 
                                 [
                                     {
-                                        "class": "ml40::TestMMM",
+                                        "class": "ml40::BatteryStatus",
                                         "voltage": 0,
                                         "maintenanceSchedule": 0,
                                         "lastMaintenanceDate": 0,
@@ -98,7 +100,7 @@ harvester_fml40_json = {
                     },
                     {
                         "class": "ml40::MachineOperatingStatus",
-                        "status": ""
+                        "status": "defekt"
                     },
                 ]
             },
@@ -164,6 +166,13 @@ class DemoHarvester(Thing):
         setup_logger("Demo Harvester")
         super(DemoHarvester, self).__init__(loop=loop, entry=entry, connector=connector)
 
+    berechne_pm()
+    speichern
+
+    def simulate_operating_hours(self):
+        self.entry.features["ml40::ProvidesMachineData"] = berechne_pm() #
+        pass 
+
     def simulate_operating_hours(self):
         """
         Recursively increases operating hours every 10 seconds.
@@ -172,7 +181,6 @@ class DemoHarvester(Thing):
         operating_hours = self.entry.features["ml40::OperatingHours"]
         operating_hours.total += 0.1
         APP_LOGGER.info("Current value: {}".format(operating_hours.total))
-        result = self.entry.features["ml40::ProvidesMachineData"].getMachineData()
         print(result)
         # mms = MaintenanceManagementService()
         # mms.run()
@@ -197,14 +205,13 @@ class DemoHarvester(Thing):
         """
         Defines the run function, adds callback functions and start the event loop in a persistent module.
         """
-        self.add_ml40_implementation(
-            DataProviderService, "ml40::ProvidesMachineData"
-        )
+        # self.add_ml40_implementation(
+        #     DataProviderService, "ml40::ProvidesMachineData"
+        # )
         self.add_on_thing_start_ok_callback(self.simulate_operating_hours, True, False)
         self.connector.add_on_event_system_start_ok_callback(
             self.recursively_send_named_event, True, False
         )
-
         self.run_forever()
 
 def read_credentials_from_yaml(file_path):
