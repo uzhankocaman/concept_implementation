@@ -9,9 +9,11 @@ from sklearn.impute import SimpleImputer
 from scipy.stats import zscore
 import numpy as np
 
-from utilities.observer_pattern import Event, Observer
+from observer_pattern import Event, Observer
 
-class DataProcessing:
+#consider NAN values
+
+class DataProcessing(Observer):
     def __init__(self, file_path='PredictiveMaintenanceService/test.xlsx'):
         self.df_raw = pd.read_excel(file_path)
         self.df_processed = self.df_raw.loc[self.df_raw.index[0]]
@@ -33,6 +35,12 @@ class DataProcessing:
         test_pipeline = []
         self.register_pipeline('test', test_pipeline)
 
+    def handle_event(self, accessed_data):
+        self.processed_data = accessed_data
+        self.run()
+        self.on_state_assessed.emit(self.processed_data)
+        self.processed_data = pd.Series()
+
     def register_pipeline(self, data_type, subfunctions):
         """ Registers a sequence of subfunctions as a pipeline for a specific data type. """
         self.pipelines[data_type] = subfunctions
@@ -48,11 +56,14 @@ class DataProcessing:
         else:
             self.logger.error(f"No pipeline registered for data type: {data_type}")
 
-    def process_data(self, data_type):
+    def process_data(self, data_type, data):
+        self.df_processed = data
         """ Processes data according to the pipeline registered for its data type. """
         self.logger.info(f"Processing {data_type} data...")
         self.execute_pipeline(data_type)
+        self.df_processed["data_type"] = data_type
         self.on_data_processed.emit(self.df_processed)
+        self.df_processed = pd.Series()
 
     def get_data(self):
         """
@@ -63,7 +74,6 @@ class DataProcessing:
     def update_subfunction(self, data_type, subfunction_name, new_subfunction):
         """ Updates a specific subfunction within a pipeline for a data type. """
         if data_type in self.pipelines:
-            # Find the subfunction by its __name__ attribute within the pipeline
             subfunctions = [subfunc for subfunc in self.pipelines[data_type] if subfunc.__name__ == subfunction_name]
             if subfunctions:
                 # Assume there is only one subfunction with the given name in the pipeline
@@ -112,7 +122,6 @@ def difference(self, df, column1, column2):
     return df
 
 def savgol(df, column, window_length=5, polyorder=2):
-    # Apply a Savitzky-Golay filter to smooth the data
     df[f"savgol_{column}"] = savgol_filter(df[column], window_length, polyorder)
     return df
 

@@ -11,3 +11,5 @@ battery:
     Vfull_original: 28.5
     Vmax: 28.5
     Vmin: 25
+filter:
+  Popt: 5

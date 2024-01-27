@@ -1,5 +1,5 @@
 from datetime import datetime 
-from utilities.observer_pattern import Event, Observer
+from observer_pattern import Event, Observer
 import time
 
 #done

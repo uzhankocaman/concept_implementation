@@ -6,7 +6,7 @@ import asyncio
 import argparse
 import yaml
 from DataProviderService.dps import DataProviderService
-from utilities.observer_pattern import Event, Observer
+from PredictiveMaintenanceService.observer_pattern import Event, Observer
 # from MaintenanceManagementService.MaintenanceManagementSystem import (
 #     MaintenanceManagementService,
 # )
@@ -170,8 +170,10 @@ class DemoHarvester(Thing):
     speichern
 
     def simulate_operating_hours(self):
-        self.entry.features["ml40::ProvidesMachineData"] = berechne_pm() #
-        pass 
+        
+         
+        
+        self.loop.call_later(10, self.simulate_operating_hours)
 
     def simulate_operating_hours(self):
         """
@@ -181,7 +183,7 @@ class DemoHarvester(Thing):
         operating_hours = self.entry.features["ml40::OperatingHours"]
         operating_hours.total += 0.1
         APP_LOGGER.info("Current value: {}".format(operating_hours.total))
-        print(result)
+        # print(result)
         # mms = MaintenanceManagementService()
         # mms.run()
         self.loop.call_later(10, self.simulate_operating_hours)

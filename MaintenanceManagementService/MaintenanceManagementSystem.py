@@ -391,6 +391,7 @@ class MaintenanceManagementService():
 
         self.check_availability_of_necessary_parts_and_tools()
 
+
     def apply_constraints_to_maintenance_action(self):
         """Apply cost constraints to the maintenance action."""
         costs = {"replace": 110, "inspect": 20, "nothing": 0}

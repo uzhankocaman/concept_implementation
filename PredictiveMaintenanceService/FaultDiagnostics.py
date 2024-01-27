@@ -2,9 +2,11 @@ import pandas as pd
 import logging
 import yaml
 # from PredictiveMaintenanceService.observer_pattern import Event, Observer
-from utilities.observer_pattern import Event, Observer
+from observer_pattern import Event, Observer
 from datetime import datetime
 
+# from DataProcessing import DataProcessing
+# from StateAdaptation import StateAdaptation
 #done
 class FaultDiagnostic(Observer):
     def __init__(self):
@@ -16,13 +18,18 @@ class FaultDiagnostic(Observer):
         self.model_deployed = None
         self.models = {
             "battery": {"soc": self.calculate_soc, "soh": self.calculate_soh},
+            "filter": {"sof": self.calculate_sof},
         }
-        self.model_metric = {"battery": {"soc": 99, "soh": 90}} 
+        self.model_metric = {"battery": {"soc": 99, "soh": 90}, "filter": {"sof": 102}} 
     
     def handle_event(self, data):
+        self.data = None
         self.data = data
         self.run()
+        print("handle_event")
         self.fault_state_assessed.emit(self.data)
+        self.data = None
+        self.model_deployed = None
 
     def run(self):
         """
@@ -31,10 +38,11 @@ class FaultDiagnostic(Observer):
         logging.info("Fault Diagnostics initialized...")
         while self.current_state is not None:
             self.current_state = self.current_state()
+        self.current_state = self.idle_state_fault
 
     def load_model_params(self):
         # Load the parameters
-        with open('C://Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/PredictiveMaintenanceService/model_params.yaml', 'r') as file:
+        with open('PredictiveMaintenanceService/model_params.yaml', 'r') as file:
             self.model_params = yaml.safe_load(file)
 
     def calculate_soc(self):
@@ -55,6 +63,15 @@ class FaultDiagnostic(Observer):
         Vfull_original = params['Vfull_original']
         SoC = abs(((self.data["health_Bat_Volt"]) / (Vfull_original))) * 100 
         return SoC
+    
+    def calculate_sof(self):
+        """
+        Calculate the State of Fuel Pressure (SoF) of the fuel filter.
+        """
+        param = self.data["configuration"]["operational_condition"]
+        optimal_fuel_pressure = param
+        SoF = abs(((self.data["FuelPressure"]) / (optimal_fuel_pressure))) * 100 
+        return SoF
 
     def idle_state_fault(self):
         if self.isModel():
@@ -87,7 +104,7 @@ class FaultDiagnostic(Observer):
 
     def failure_alarm(self):
         logging.error("Fatal fault detected! Triggering alarm.")
-        print("Alarm.")
+        # print("Alarm.")
 
     def generate_and_send_assessment_report(self):
         logging.info(f"Assessment report generated and sent. ")
@@ -103,11 +120,14 @@ class FaultDiagnostic(Observer):
 
     def isHealth(self):
         self.data["health"] = self.model_deployed()
-        self.data["health_status"] = list(self.model_metric[self.data["configuration"]["data_type"]].values())[0] < self.data["health"]
+        if self.data["configuration"]["data_type"] == "battery":
+            self.data["health_status"] = list(self.model_metric[self.data["configuration"]["data_type"]].values())[0] < self.data["health"]
+        if self.data["configuration"]["data_type"] == "filter":
+            self.data["health_status"] = list(self.model_metric[self.data["configuration"]["data_type"]].values())[0] > self.data["health"]
         return self.data["health_status"]
         
     def isFatal(self):
-        # Determine if the anomaly is fatal
+        # Fatal anomalies or faults can be reported immediately
         return False
 
     def isProcessed(self):
@@ -117,16 +137,33 @@ class FaultDiagnostic(Observer):
     def process_fault(self):
         return {
             "health_status": self.data["health_status"],
-            "fault_time": datetime.now(),
+            "fault_time": datetime.now(), #self.data["timestamp"]
             "fault_location": self.data["configuration"]["data_type"],
             "fault_severity": self.calc_severity()
         }
     
     def calc_severity(self):
         """ Calculate the severity rating """
-        if not 0 <= self.data["health"] <= 100:
-            raise ValueError("error.")
-        severity = 5 - self.data["health"] // 20
+        if self.data["configuration"]["data_type"] == "battery":
+            if not 0 <= self.data["health"] <= 100:
+                raise ValueError("error.")
+            severity = 5 - self.data["health"] // 20
+        if self.data["configuration"]["data_type"] == "filter":
+            # self.data["health"] < self.model_metric[self.data["configuration"]["data_type"]]["sof"]
+            target_health = self.model_metric[self.data["configuration"]["data_type"]]["sof"]
+            deviation = abs(self.data["health"] - target_health)
+            if deviation == 0:
+                severity = 0  # No severity if health is exactly 100
+            elif deviation <= 5:
+                severity = 1
+            elif deviation <= 10:
+                severity = 2
+            elif deviation <= 15:
+                severity = 3
+            elif deviation <= 20:
+                severity = 4
+            else:
+                severity = 5
         return severity
 
     def isReport(self):
@@ -138,3 +175,10 @@ class FaultDiagnostic(Observer):
     def get_data(self):
         return self.data
     
+
+# data_processor = DataProcessing()
+# state_adaptation = StateAdaptation()
+# data_processor.on_data_processed.subscribe(state_adaptation)
+# fault_diagnostic = FaultDiagnostic()
+# state_adaptation.on_state_assessed.subscribe(fault_diagnostic)
+# data_processor.process_data('battery')

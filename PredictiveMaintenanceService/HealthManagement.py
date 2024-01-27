@@ -1,6 +1,6 @@
 # {'health_status': False, 'fault_time': datetime.datetime(2024, 1, 22, 8, 25, 2, 524487), 'fault_location': 'battery', 'fault_severity': 1.0}
 # {'health_status': True}
-from utilities.observer_pattern import Observer, Event
+from observer_pattern import Observer, Event
 import pandas as pd
 import logging
 import time
@@ -8,6 +8,8 @@ from DataProcessing import DataProcessing
 from StateAdaptation import StateAdaptation
 from Prognostics import Prognostics
 from FaultDiagnostics import FaultDiagnostic
+import numpy as np
+import sqlite3
 
 class HealthManagement(Observer):
     def __init__(self):
@@ -24,6 +26,9 @@ class HealthManagement(Observer):
         self.i += 1
         if self.is_ready_to_transmit_advisory():
             self.run()
+            self.i = 0
+            self.data = {}
+            self.reports = {}
         else:
             # If not ready, continue waiting or perform other checks
             logging.info("Waiting for conditions to be met to transmit advisory.")
@@ -49,7 +54,7 @@ class HealthManagement(Observer):
     def organize_data(self):
         self.organized_data = {}
         for index in range(self.i):
-            if index == 0:
+            if np.sum(self.data[index].keys() == 'fault_diagnostic_report'):
                 entry = self.data[index]
                 self.organized_data = {
                     "datetime": entry["datetime"],
@@ -58,7 +63,7 @@ class HealthManagement(Observer):
                     "fault_diagnostic_health_status": entry["fault_diagnostic_report"].get("health_status", None),
                     "fault_location": entry["fault_diagnostic_report"].get("fault_location", None),
                     "faulty_severity": entry["fault_diagnostic_report"].get("fault_severity", None),
-                    "prognostic_status": entry["prognostics_report"].get("prognostic_status", None),
+                    # "prognostic_status": entry["prognostics_report"].get("prognostic_status", None),
                 }
     
     def integrate_information(self):
@@ -74,7 +79,7 @@ class HealthManagement(Observer):
         advisories = {
             ('battery', 'engine_running'): "health problem",
             ('battery', 'engine_not_running'): "charging problem",
-            ('filter',): "high pressure detected",
+            ('filter', self.integrated_data.get('operational_condition')): "high pressure detected",
         }
         condition_key = (self.integrated_data['data_type'], self.integrated_data.get('operational_condition'))
         analysis = advisories.get(condition_key, "Status normal or undetermined.")
@@ -99,4 +104,19 @@ state_adaptation.on_state_assessed.subscribe(prognostic)
 fault_diagnostic.fault_state_assessed.subscribe(health_management)
 prognostic.prognostic_state_assessed.subscribe(health_management)
 
-data_processor.process_data('battery')
+
+db_file_path = "C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/can_data_processed_23112023.db"
+conn = sqlite3.connect(db_file_path)
+query = "SELECT * FROM ProcessedCANData"
+df_raw = pd.read_sql_query(query, conn)
+conn.close()
+
+
+# file_path='PredictiveMaintenanceService/test.xlsx'
+# df_raw = pd.read_excel(file_path)
+df_processed = df_raw.loc[df_raw.index[0]]   
+for i in range(len(df_raw)):
+    df_processed = df_raw.loc[df_raw.index[i]]   
+    # print(df_processed)
+    data_processor.process_data('battery', df_processed)
+    data_processor.process_data("filter", df_processed)
