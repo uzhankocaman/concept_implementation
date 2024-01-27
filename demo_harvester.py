@@ -6,7 +6,7 @@ import asyncio
 import argparse
 import yaml
 from DataProviderService.dps import DataProviderService
-from PredictiveMaintenanceService.observer_pattern import Event, Observer
+from utilities.observer_pattern import Event, Observer
 # from MaintenanceManagementService.MaintenanceManagementSystem import (
 #     MaintenanceManagementService,
 # )
@@ -167,7 +167,7 @@ class DemoHarvester(Thing):
         super(DemoHarvester, self).__init__(loop=loop, entry=entry, connector=connector)
 
     berechne_pm()
-    speichern
+    speichern #dps call
 
     def simulate_operating_hours(self):
         

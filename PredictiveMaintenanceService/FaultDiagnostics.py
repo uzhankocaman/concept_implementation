@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 import yaml
 # from PredictiveMaintenanceService.observer_pattern import Event, Observer
-from observer_pattern import Event, Observer
+from utilities.observer_pattern import Event, Observer
 from datetime import datetime
 
 # from DataProcessing import DataProcessing
@@ -23,13 +23,17 @@ class FaultDiagnostic(Observer):
         self.model_metric = {"battery": {"soc": 99, "soh": 90}, "filter": {"sof": 102}} 
     
     def handle_event(self, data):
-        self.data = None
+        print("FDA handle_event 1")
         self.data = data
+        print("FDA handle_event 2")
         self.run()
-        print("handle_event")
+        print("FDA handle_event 3")
         self.fault_state_assessed.emit(self.data)
+        print("FDA handle_event 4")
         self.data = None
+        print("FDA handle_event 5")
         self.model_deployed = None
+        print("FDA handle_event 6")
 
     def run(self):
         """

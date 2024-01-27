@@ -1,5 +1,5 @@
 from ml.ml40.features.functionalities.provides_machine_data import ProvidesMachineData
-from PredictiveMaintenanceService.observer_pattern import Event, Observer
+from utilities.observer_pattern import Event, Observer
 import cantools
 import can
 import os

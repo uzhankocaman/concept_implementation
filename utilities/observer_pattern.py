@@ -1,6 +1,4 @@
 
-import asyncio
-
 class Observer:
     def handle_event(self, data):
         raise NotImplementedError("Implement in subclass")

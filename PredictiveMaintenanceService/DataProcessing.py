@@ -9,14 +9,14 @@ from sklearn.impute import SimpleImputer
 from scipy.stats import zscore
 import numpy as np
 
-from observer_pattern import Event, Observer
+from utilities.observer_pattern import Event, Observer
 
 #consider NAN values
 
 class DataProcessing(Observer):
-    def __init__(self, file_path='PredictiveMaintenanceService/test.xlsx'):
-        self.df_raw = pd.read_excel(file_path)
-        self.df_processed = self.df_raw.loc[self.df_raw.index[0]]
+    def __init__(self):
+        self.df_raw = None
+        self.df_processed = None
         self.pipelines = {}
         self.on_data_processed = Event()
         self.logger = logging.getLogger('DataProcessing')
@@ -32,14 +32,17 @@ class DataProcessing(Observer):
         self.register_pipeline('fuel', fuel_pipeline)
 
         #Test
-        test_pipeline = []
-        self.register_pipeline('test', test_pipeline)
+        # test_pipeline = []
+        # self.register_pipeline('test', test_pipeline)
 
     def handle_event(self, accessed_data):
-        self.processed_data = accessed_data
-        self.run()
-        self.on_state_assessed.emit(self.processed_data)
-        self.processed_data = pd.Series()
+        self.df_raw = accessed_data
+        self.df_processed = accessed_data
+        self.process_data()
+        # state_processed_data = self.df_processed.copy()
+        # self.on_data_processed.emit(state_processed_data)
+        self.df_processed = pd.Series()
+        self.df_raw = pd.Series()
 
     def register_pipeline(self, data_type, subfunctions):
         """ Registers a sequence of subfunctions as a pipeline for a specific data type. """
@@ -54,15 +57,14 @@ class DataProcessing(Observer):
                 except Exception as e:
                     print("An error occurred in the pipeline execution.")
         else:
-            self.logger.error(f"No pipeline registered for data type: {data_type}")
+            self.logger.error(f"Empty pipeline registered for data type: {data_type}")
 
-    def process_data(self, data_type, data):
-        self.df_processed = data
+    def process_data(self):
+        # self.df_processed["data_type"] = data_type
         """ Processes data according to the pipeline registered for its data type. """
-        self.logger.info(f"Processing {data_type} data...")
-        self.execute_pipeline(data_type)
-        self.df_processed["data_type"] = data_type
-        self.on_data_processed.emit(self.df_processed)
+        self.logger.info(f"Processing {self.df_processed['data_type']} data...")
+        self.execute_pipeline(self.df_processed['data_type'])
+        self.on_data_processed.emit(self.df_processed.copy())
         self.df_processed = pd.Series()
 
     def get_data(self):

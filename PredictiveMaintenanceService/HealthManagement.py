@@ -1,13 +1,14 @@
 # {'health_status': False, 'fault_time': datetime.datetime(2024, 1, 22, 8, 25, 2, 524487), 'fault_location': 'battery', 'fault_severity': 1.0}
 # {'health_status': True}
-from observer_pattern import Observer, Event
+from utilities.observer_pattern import Observer, Event
 import pandas as pd
 import logging
 import time
-from DataProcessing import DataProcessing
-from StateAdaptation import StateAdaptation
-from Prognostics import Prognostics
-from FaultDiagnostics import FaultDiagnostic
+# from DataAcquisition import DataAcquisition
+# from DataProcessing import DataProcessing
+# from StateAdaptation import StateAdaptation
+# from Prognostics import Prognostics
+# from FaultDiagnostics import FaultDiagnostic
 import numpy as np
 import sqlite3
 
@@ -86,37 +87,45 @@ class HealthManagement(Observer):
         self.integrated_data["analysis"] = analysis
 
     def transmit_advisory(self):
-        self.health_management_complete.emit(self.integrated_data)
+        # self.health_management_complete.emit(self.integrated_data)
         logging.info("Advisory transmitted to the next class.")
         self.data.clear()
         self.organized_data.clear()
         self.integrated_data.clear()
         self.i = 0
 
-data_processor = DataProcessing()
-state_adaptation = StateAdaptation()
-fault_diagnostic = FaultDiagnostic()
-prognostic = Prognostics()
-health_management = HealthManagement()
-data_processor.on_data_processed.subscribe(state_adaptation)
-state_adaptation.on_state_assessed.subscribe(fault_diagnostic)
-state_adaptation.on_state_assessed.subscribe(prognostic)
-fault_diagnostic.fault_state_assessed.subscribe(health_management)
-prognostic.prognostic_state_assessed.subscribe(health_management)
+# data_acquisition = DataAcquisition()
+# data_processor = DataProcessing()
+# state_adaptation = StateAdaptation()
+# fault_diagnostic = FaultDiagnostic()
+# prognostic = Prognostics()
+# health_management = HealthManagement()
 
+# data_acquisition.on_data_accessed.subscribe(data_processor)
 
-db_file_path = "C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/can_data_processed_23112023.db"
-conn = sqlite3.connect(db_file_path)
-query = "SELECT * FROM ProcessedCANData"
-df_raw = pd.read_sql_query(query, conn)
-conn.close()
+# data_processor.on_data_processed.subscribe(state_adaptation)
 
+# state_adaptation.on_state_assessed.subscribe(fault_diagnostic)
+# state_adaptation.on_state_assessed.subscribe(prognostic)
+
+# fault_diagnostic.fault_state_assessed.subscribe(health_management)
+# prognostic.prognostic_state_assessed.subscribe(health_management)
+
+# db_file_path = "C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/can_data_processed_23112023.db"
+# conn = sqlite3.connect(db_file_path)
+# query = "SELECT * FROM ProcessedCANData"
+# df_raw = pd.read_sql_query(query, conn)
+# conn.close()
 
 # file_path='PredictiveMaintenanceService/test.xlsx'
 # df_raw = pd.read_excel(file_path)
-df_processed = df_raw.loc[df_raw.index[0]]   
-for i in range(len(df_raw)):
-    df_processed = df_raw.loc[df_raw.index[i]]   
-    # print(df_processed)
-    data_processor.process_data('battery', df_processed)
-    data_processor.process_data("filter", df_processed)
+# for i in range(len(df_raw)):
+#     df_processed = df_raw.loc[df_raw.index[i]]   
+#     # print(df_processed)
+#     print("battery KKK")
+#     data_acquisition.collect_data(df_processed, 'battery')
+#     print("filter KKK")
+#     data_acquisition.collect_data(df_processed, "filter")
+
+# df_processed = df_raw.loc[df_raw.index[0]]  
+# data_acquisition.collect_data(df_processed, 'battery') 

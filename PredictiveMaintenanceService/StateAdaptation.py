@@ -1,5 +1,5 @@
 import pandas as pd
-from observer_pattern import Event, Observer
+from utilities.observer_pattern import Event, Observer
 import yaml
 
 class StateAdaptation(Observer):
@@ -23,8 +23,10 @@ class StateAdaptation(Observer):
         print("hello SAA event")
         self.processed_data = processed_data
         self.run()
-        self.on_state_assessed.emit(self.processed_data)
+        state_assessed_data = self.processed_data.copy()
+        self.on_state_assessed.emit(state_assessed_data)
         self.processed_data = pd.Series()
+        state_assessed_data = pd.Series()
 
 
     def load_known_conditions(self):

@@ -528,5 +528,5 @@ class MaintenanceManagementService():
         # store in database
 
 
-mms = MaintenanceManagementService()
-mms.run()
+# mms = MaintenanceManagementService()
+# mms.run()
