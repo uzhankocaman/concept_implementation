@@ -39,7 +39,7 @@ import logging
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
+from utilities.observer_pattern import Event, Observer
 # from .monitoring import MonitoringUI
 
 class PersonnelManager:
@@ -115,23 +115,23 @@ class InventoryManager:
 
     def determine_reorder_quantity(self, part_name):
         """Determine the quantity to reorder for a specific part."""
-        quantity = {"fuel filter": 2, "battery": 1}
+        quantity = {"filter": 2, "battery": 1}
         return quantity[part_name]  # Example fixed reorder quantity
 
     def get_estimated_arrival_time(self, part_name):
         """Get the estimated arrival time for an ordered part."""
         days_to_arrival = self.delivery_times.get(part_name, 0)
-        arrival_date = datetime.datetime.now() + datetime.timedelta(
+        arrival_date = timedelta(
             days=days_to_arrival
         )
         return arrival_date
 
 
-class MaintenanceManagementService():
+class MaintenanceManagementService(Observer):
     def __init__(self):
         self.initialize_database()
         self.load_state()
-        self.delivery_times = {"fuel filter": 2, "battery": 5}
+        self.delivery_times = {"filter": 2, "battery": 5}
         self.inventory_manager = InventoryManager(
             self.parts_inventory, self.delivery_times
         )
@@ -300,37 +300,50 @@ class MaintenanceManagementService():
         conn.commit()
         conn.close()
 
+    def handle_event(self, data):
+        self.receive_maintenance_advisory(data)
+        if len(list(self.advisories.queue)) == 2: #wait for all advisories to process
+            self.run()
+        else:
+            logging.info("Waiting for conditions to be met to process advisories.")
+    
     def run(self):
-        self.receive_maintenance_advisories(
-            [
-                {
-                    "id": 1,
-                    "fault": "high pressure detected",
-                    "fault_location": "fuel filter",
-                    "fault_time": datetime.now(),
-                    "fault_severity": 4,
-                    "degradation_severity": 0,
-                },
-                {
-                    "id": 22,
-                    "fault": "high pressure detected",
-                    "fault_location": "fuel filter",
-                    "fault_time": datetime.now(),
-                    "fault_severity": 4,
-                    "degradation_severity": 0,
-                },
-            ]
-        )
+        # self.receive_maintenance_advisories(
+        #     [
+        #         {
+        #             "id": 1,
+        #             "fault": "high pressure detected",
+        #             "fault_location": "fuel filter",
+        #             "fault_time": datetime.now(),
+        #             "fault_severity": 4,
+        #             "degradation_severity": 0,
+        #         },
+        #         {
+        #             "id": 22,
+        #             "fault": "high pressure detected",
+        #             "fault_location": "fuel filter",
+        #             "fault_time": datetime.now(),
+        #             "fault_severity": 4,
+        #             "degradation_severity": 0,
+        #         },
+        #     ]
+        # )
+        # advisory1 = {'datetime': '2023-11-23 13:55:27.089999', 'data_type': 'battery', 'operational_condition': 'engine_running', 'fault_diagnostic_health_status': False, 'fault_location': 'battery', 'fault_severity': 1.0, 'analysis': 'health problem'}
+        # advisory12 = {'datetime': '2023-11-23 13:55:27.089999', 'data_type': 'battery', 'operational_condition': 'engine_running', 'fault_diagnostic_health_status': True, 'fault_location': 'battery', 'fault_severity': 5.0, 'analysis': 'health problem'}
+        # advisory2 = {'datetime': '2023-11-23 13:55:27.089999', 'data_type': 'filter', 'operational_condition': 4.406735628686353, 'fault_diagnostic_health_status': True, 'fault_location': None, 'fault_severity': None, 'analysis': 'high pressure detected'}
+        
+        # self.advisories.put(advisory1)
+        # self.advisories.put(advisory12)
+        # self.advisories.put(advisory2)
         self.process_maintenance_needs()
         # self.real_time_monitoring()
         self.update_system_status()
-        self.store_reports()
-        self.save_state()
+        # self.store_reports()
+        # self.save_state()
 
-    def receive_maintenance_advisories(self, advisories):
+    def receive_maintenance_advisory(self, advisory):
         """Receive advisories and add them to the advisories list."""
-        for advisory in advisories:
-            self.advisories.put(advisory)
+        self.advisories.put(advisory)
 
     def process_maintenance_needs(self):
         """Analyze the advisories to understand maintenance needs."""
@@ -346,7 +359,7 @@ class MaintenanceManagementService():
             [
                 True
                 for key, value in self.advisory.items()
-                if key.endswith("_severity") and int(value) > 2
+                if key.endswith("_severity") and value is not None and int(value) > 2
             ]
         )
         if self.advisory["maintenance_required"]:
@@ -359,36 +372,62 @@ class MaintenanceManagementService():
         # Rule-based maintenance action determination
         # Parse the advisory for specific actions to be taken
         if (
-            self.advisory["fault"] == "high pressure detected"
-            and self.advisory["fault_location"] == "fuel filter"
+            self.advisory["analysis"] == "high pressure detected"
+            and self.advisory["fault_location"] == "filter"
         ):
             if self.advisory["fault_severity"] == 5:
                 self.advisory["required"] = {
                     "action": "replace",
-                    "component": "fuel filter",
+                    "component": "filter",
                     "urgency": "immediate",
                 }
             elif self.advisory["fault_severity"] == 4:
                 self.advisory["required"] = {
                     "action": "replace",
-                    "component": "fuel filter",
+                    "component": "filter",
                     "urgency": "scheduled",
                 }
             else:  # 3
                 self.advisory["required"] = {
                     "action": "inspect",
-                    "component": "fuel filter",
+                    "component": "filter",
                     "urgency": "scheduled",
                 }
-        elif self.advisory["fault_location"] == "fuel filter":
+        elif self.advisory["fault_location"] == "filter":
             self.advisory["required"] = {
                 "action": "inspect",
-                "component": "fuel filter",
+                "component": "filter",
                 "urgency": "scheduled",
             }
 
-        self.apply_constraints_to_maintenance_action()
+        if self.advisory['data_type'] == 'battery' and self.advisory['analysis'] == 'health problem':
+            severity = self.advisory['fault_severity']
+            if severity > 4:
+                self.advisory["required"] = {
+                    "action": "replace",
+                    "component": "battery",
+                    "urgency": "immediate",
+                }
+            elif severity == 4:
+                self.advisory["required"] = {
+                    "action": "inspect",
+                    "component": "battery",
+                    "urgency": "immediate",
+                }
+            else:  # severity < 2
+                self.advisory["required"] = {
+                    "action": "routine inspection",
+                    "component": "battery",
+                    "urgency": "scheduled",
+                }
+        else:
+            self.advisory['maintenance_advisory'] = {
+                "action": "none",
+                "component": "N/A",
+                "urgency": "N/A",
+            }
 
+        self.apply_constraints_to_maintenance_action()
         self.check_availability_of_necessary_parts_and_tools()
 
 
@@ -424,14 +463,9 @@ class MaintenanceManagementService():
                 self.inventory_manager.order_new_inventory(
                     required_component, reorder_quantity
                 )
-                self.advisory["required"]["delay_due_missing_part"] = (
-                    self.inventory_manager.get_estimated_arrival_time(
-                        required_component
-                    )
-                    - datetime.datetime.now()
-                )
+                self.advisory["required"]["delay_due_missing_part"] = self.inventory_manager.get_estimated_arrival_time(required_component)
         else:
-            self.advisory["required"]["delay_due_missing_part"] = 0
+            self.advisory["required"]["delay_due_missing_part"] = timedelta(days=0)
 
         self.develop_maintenance_plan()
 
@@ -443,17 +477,19 @@ class MaintenanceManagementService():
     def schedule_maintenance_task(self):
         """Schedule the maintenance tasks to be performed."""
         urgency_task = {
-            "scheduled": 7,
-            "immediate": 0,
+            "scheduled": timedelta(days=7),
+            "immediate": timedelta(days=0),
         }  # assuming a scheduled task can be done after 7 days, and a immediate task needs be handled asap
-        delay_due_personnel = 3  # assuming the maintenance provider has a fixed notice period of 3 days for any personnel
+        delay_due_personnel = timedelta(days=3)  # assuming the maintenance provider has a fixed notice period of 3 days for any personnel
+        delay_due_missing_part = self.advisory["required"].get("delay_due_missing_part", timedelta(days=0))
         delay = max(
-            self.advisory["required"]["delay_due_missing_part"],
+            delay_due_missing_part,
             delay_due_personnel,
             urgency_task[self.advisory["required"]["urgency"]],
         )
-        schedule = datetime.now() + timedelta(days=delay)
-        self.advisory["schedule"] = schedule.date()
+        schedule_datetime = datetime.strptime(self.advisory["datetime"], '%Y-%m-%d %H:%M:%S.%f')
+        schedule = schedule_datetime + delay
+        self.advisory["schedule"] = schedule
 
     def allocate_personnel_to_task(self):
         """Assign personnel to carry out the scheduled maintenance tasks considering their availability and skills."""
@@ -484,44 +520,52 @@ class MaintenanceManagementService():
 
     def generate_report(self):
         advisory = self.advisory
-        report = []
+        report = {
+            "MAINTENANCE REPORT ID": self.advisory.get('data_type', 'N/A'),
+            "ANALYSIS": {
+                "Operational Condition": self.advisory.get('operational_condition', 'N/A'),
+                "Health Status": self.advisory.get('fault_diagnostic_health_status', 'N/A'),
+                "Fault Location": self.advisory.get('fault_location', 'N/A'),
+                "Time Detected": self.advisory.get('datetime', 'N/A'),
+                "Fault Severity (1-5 scale)": self.advisory.get('faulty_severity', 'N/A'),
+                "Fault Severity": self.advisory.get('fault_severity', 'N/A'),  # for second advisory compatibility
+                "Analysis": self.advisory.get('analysis', 'N/A'),
+                "Maintenance Required": self.advisory.get('maintenance_required', 'N/A')
+            }
+        }
 
-        # Report Header
-        report.append(f"MAINTENANCE REPORT ID: {advisory['id']}")
-        report.append("=" * 50)
-
-        # Analysis Section
-        report.append("ANALYSIS:")
-        report.append(f"  Fault Detected: {advisory['fault']}")
-        report.append(f"  Location: {advisory['fault_location']}")
-        report.append(f"  Time Detected: {advisory['fault_time'].strftime('%Y-%m-%d %H:%M:%S')}")
-        report.append(f"  Fault Severity (1-5 scale): {advisory['fault_severity']}")
-        report.append(f"  Equipment Degradation Severity (1-5 scale): {advisory['degradation_severity']}")
-        report.append(f"  Maintenance Required: {'Yes' if advisory['maintenance_required'] else 'No'}")
-        report.append("-" * 50)
-
-        # Maintenance Action Plan Section
-        required_action = advisory.get('required', {})
-        report.append("MAINTENANCE ACTION PLAN:")
-        report.append(f"  Proposed Action: {required_action.get('action', 'N/A')}")
-        report.append(f"  Affected Component: {required_action.get('component', 'N/A')}")
-        report.append(f"  Urgency Level: {required_action.get('urgency', 'N/A')}")
-        delay = required_action.get('delay_due_missing_part', 0)
-        report.append(f"  Delay Due to Missing Parts: {delay} day(s)" if delay else "  No Delay Expected")
-        report.append("-" * 50)
-
-        # Scheduling and Personnel Assignment Section
-        schedule_date = advisory.get('schedule', 'N/A')
-        assigned_personnel = advisory.get('assigned_personnel', 'Unassigned')
-        report.append("SCHEDULING AND PERSONNEL ASSIGNMENT:")
-        report.append(f"  Maintenance Scheduled On: {schedule_date}")
-        report.append(f"  Assigned Maintenance Personnel: {assigned_personnel}")
-        report.append("=" * 50)
-
-        # Combine all parts into a single report string
-        self.reports[f"{self.advisory['id']}"] = " \n".join(report)
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(self.reports[f"{self.advisory['id']}"])
+        # Convert the report dictionary to a JSON string
+        self.report_json = json.dumps(report, indent=4)
+    
+    def get_report(self):
+        return self.report_json
+        # report.append(f"MAINTENANCE REPORT ID: {advisory['data_type']}")
+        # report.append("=" * 50)
+        # report.append("ANALYSIS:")
+        # report.append(f"  Fault Detected: {advisory['fault']}")
+        # report.append(f"  Location: {advisory['fault_location']}")
+        # report.append(f"  Time Detected: {advisory['fault_time'].strftime('%Y-%m-%d %H:%M:%S')}")
+        # report.append(f"  Fault Severity (1-5 scale): {advisory['fault_severity']}")
+        # report.append(f"  Equipment Degradation Severity (1-5 scale): {advisory['degradation_severity']}")
+        # report.append(f"  Maintenance Required: {'Yes' if advisory['maintenance_required'] else 'No'}")
+        # report.append("-" * 50)
+        # required_action = advisory.get('required', {})
+        # report.append("MAINTENANCE ACTION PLAN:")
+        # report.append(f"  Proposed Action: {required_action.get('action', 'N/A')}")
+        # report.append(f"  Affected Component: {required_action.get('component', 'N/A')}")
+        # report.append(f"  Urgency Level: {required_action.get('urgency', 'N/A')}")
+        # delay = required_action.get('delay_due_missing_part', 0)
+        # report.append(f"  Delay Due to Missing Parts: {delay} day(s)" if delay else "  No Delay Expected")
+        # report.append("-" * 50)
+        # schedule_date = advisory.get('schedule', 'N/A')
+        # assigned_personnel = advisory.get('assigned_personnel', 'Unassigned')
+        # report.append("SCHEDULING AND PERSONNEL ASSIGNMENT:")
+        # report.append(f"  Maintenance Scheduled On: {schedule_date}")
+        # report.append(f"  Assigned Maintenance Personnel: {assigned_personnel}")
+        # report.append("=" * 50)
+        # self.reports[f"{self.advisory['data_type']}"] = " \n".join(report)
+        # pp = pprint.PrettyPrinter(indent=4)
+        # pp.pprint(self.reports[f"{self.advisory['data_type']}"])
 
     def store_reports(self):
         """Storing the report in a persistent storage."""
@@ -530,3 +574,4 @@ class MaintenanceManagementService():
 
 # mms = MaintenanceManagementService()
 # mms.run()
+# print("hello")

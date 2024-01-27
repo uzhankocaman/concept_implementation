@@ -4647,3 +4647,24 @@
 2024-01-24 16:48:22,801 - INFO - [ForestML 4.0] Demo Harvester: Current value: 1.0999999999999999
 2024-01-24 16:48:32,797 - INFO - [ForestML 4.0] Demo Harvester: Current value: 1.2
 2024-01-24 16:48:42,789 - INFO - [ForestML 4.0] Demo Harvester: Current value: 1.3
+2024-01-27 17:40:16,474 - INFO - [ForestML 4.0] Demo Harvester: Start the thing identified as s3i:c2c713c4-910f-405f-86af-e2ce67f6bea5 and named as Maintenance Analysis Harvester
+2024-01-27 17:40:54,430 - INFO - [ForestML 4.0] Demo Harvester: Start the thing identified as s3i:c2c713c4-910f-405f-86af-e2ce67f6bea5 and named as Maintenance Analysis Harvester
+2024-01-27 17:43:44,540 - INFO - [ForestML 4.0] Demo Harvester: Start the thing identified as s3i:c2c713c4-910f-405f-86af-e2ce67f6bea5 and named as Maintenance Analysis Harvester
+2024-01-27 17:43:59,639 - INFO - [ForestML 4.0] Demo Harvester: Start the thing identified as s3i:c2c713c4-910f-405f-86af-e2ce67f6bea5 and named as Maintenance Analysis Harvester
+2024-01-27 17:43:59,640 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.1
+2024-01-27 17:44:00,946 - INFO - [ForestML 4.0] Demo Harvester: [S3I][IdentityProvider]: Connection built
+2024-01-27 17:44:00,947 - INFO - [ForestML 4.0] Demo Harvester: [S3I][IdentityProvider]: Access Token granted
+2024-01-27 17:44:00,948 - INFO - [ForestML 4.0] Demo Harvester: [S3I][Config]: Connection built
+2024-01-27 17:44:02,784 - INFO - [ForestML 4.0] Demo Harvester: [S3I][Directory]: Connection built
+2024-01-27 17:44:02,785 - INFO - [ForestML 4.0] Demo Harvester: [S3I][EventSystem]: Setup event system
+2024-01-27 17:44:03,346 - INFO - [ForestML 4.0] Demo Harvester: [S3I][EventBroker]: Connection built via AMQP
+2024-01-27 17:44:03,767 - INFO - [ForestML 4.0] Demo Harvester: [S3I][Repository]: Connection built
+2024-01-27 17:44:04,086 - INFO - [ForestML 4.0] Demo Harvester: [S3I][Broker]: Connection built via AMQP
+2024-01-27 17:44:09,633 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.2
+2024-01-27 17:44:19,637 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.30000000000000004
+2024-01-27 17:44:29,632 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.4
+2024-01-27 17:44:39,644 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.5
+2024-01-27 17:44:49,646 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.6
+2024-01-27 17:44:59,634 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.7
+2024-01-27 17:45:09,643 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.7999999999999999
+2024-01-27 17:45:19,638 - INFO - [ForestML 4.0] Demo Harvester: Current value: 0.8999999999999999

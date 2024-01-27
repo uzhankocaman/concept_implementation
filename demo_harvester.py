@@ -1,11 +1,11 @@
 from ml import build, setup_logger, S3IConnector, Thing, S3IParameter, APP_LOGGER
-from ml.ml40.features.functionalities.provides_machine_data import ProvidesMachineData
-from ml.ml40.features.functionalities.predicts_maintenance import PredictsMaintenance
-from ml.ml40.features.functionalities.manages_maintenance import ManagesMaintenance
+# from ml.ml40.features.functionalities.provides_machine_data import ProvidesMachineData
+# from ml.ml40.features.functionalities.predicts_maintenance import PredictsMaintenance
+# from ml.ml40.features.functionalities.manages_maintenance import ManagesMaintenance
 import asyncio
 import argparse
 import yaml
-from DataProviderService.dps import DataProviderService
+# from DataProviderService.dps import DataProviderService
 from utilities.observer_pattern import Event, Observer
 # from MaintenanceManagementService.MaintenanceManagementSystem import (
 #     MaintenanceManagementService,
@@ -16,6 +16,101 @@ from utilities.observer_pattern import Event, Observer
 """
 Serializes the DT modeling conform to ForestML 4.0.
 """
+# harvester_fml40_json = {
+#   "thingId": "",
+#   "policyId": "",
+#   "attributes": {
+#     "class": "ml40::Thing",
+#     "name": "Maintenance Analysis Harvester",
+#     "roles": [
+#       {
+#         "class": "fml40::Harvester"
+#       }
+#     ],
+#     "features": 
+#     [
+#         {"class": "fml40::ProvidesMachineData"},
+#         {
+#         "class": "ml40::Composite",
+#         "targets": [
+#             {
+#                 "class": "ml40::Thing",
+#                 "name": "Diesel Engine",
+#                 "roles": [
+#                     {
+#                         "class": "ml40::Engine"
+#                     }
+#                 ],
+#                 "features": 
+#                 [
+#                     {
+#                         "class": "ml40::Composite",
+#                         "targets": 
+#                         [
+#                             {
+#                                 "class": "ml40:Thing",
+#                                 "name": "Fuel Filter",
+#                                 "roles": 
+#                                 [
+#                                     {
+#                                         "class": "ml40::FuelFilter" #FuelFilter
+#                                     },
+#                                 ],
+#                                 "features": 
+#                                 [
+#                                     {
+#                                         "class": "ml40::Pressure",
+#                                         "pressure": 0
+#                                     },
+#                                 ]
+#                             },
+#                             {
+#                                 "class": "ml40:Thing",
+#                                 "name": "Battery",
+#                                 "roles": 
+#                                 [
+#                                     {
+#                                         "class": "fml40::Battery"
+#                                     },
+#                                 ],
+#                                 "features": 
+#                                 [
+#                                     {
+#                                         "class": "ml40::BatteryStatus",
+#                                         "voltage": 0,
+#                                     },
+#                                 ]
+#                             },
+#                         ]
+#                     },
+#                     {
+#                         "class": "ml40::RotationalSpeed",
+#                         "rpm": 0
+#                     },
+#                     {
+#                         "class": "ml40::Temperature",
+#                         "temperature": 0
+#                     },
+#                     {
+#                         "class": "ml40::CurrentLoad",
+#                         "load": 0
+#                     },
+#                 ]
+#             },
+#             ]
+#         },
+#         {
+#         "class": "ml40::Time",
+#         "time": 0
+#         },
+#     ]
+#   }
+# }
+
+# {
+#         "class": "ml40::ProvidesMachineData",
+#         },
+
 harvester_fml40_json = {
   "thingId": "",
   "policyId": "",
@@ -44,78 +139,74 @@ harvester_fml40_json = {
                 "features": 
                 [
                     {
-                        "class": "ml40::Composite",
-                        "targets": 
-                        [
-                            {
-                                "class": "ml40:Thing",
-                                "name": "Fuel Filter",
-                                "roles": 
-                                [
-                                    {
-                                        "class": "ml40::FuelFilter" #FuelFilter
-                                    },
-                                ],
-                                "features": 
-                                [
-                                    {
-                                        "class": "ml40::Pressure",
-                                        "pressure": 0
-                                    },
-                                ]
-                            },
-                            {
-                                "class": "ml40:Thing",
-                                "name": "Battery",
-                                "roles": 
-                                [
-                                    {
-                                        "class": "ml40::PressureSensor"
-                                    },
-                                ],
-                                "features": 
-                                [
-                                    {
-                                        "class": "ml40::BatteryStatus",
-                                        "voltage": 0,
-                                        "maintenanceSchedule": 0,
-                                        "lastMaintenanceDate": 0,
-                                        "test": 0,
-                                    },
-                                ]
-                            },
-                        ]
-                    },
-                    {
                         "class": "ml40::RotationalSpeed",
                         "rpm": 0
                     },
+                    # {
+                    #     "class": "ml40::CurrentLoad",
+                    #     "load": 0
+                    # },
+                ]
+            },
+            {
+                "class": "ml40:Thing",
+                "name": "Fuel Filter",
+                "roles": 
+                [
                     {
-                        "class": "ml40::Temperature",
-                        "temperature": 0
+                        "class": "ml40::FuelFilter" #FuelFilter
                     },
+                ],
+                "features": 
+                [
                     {
-                        "class": "ml40::CurrentLoad",
-                        "load": 0
+                        "class": "ml40::Pressure",
+                        "pressure": 0
                     },
+                ]
+            },
+            {
+                "class": "ml40:Thing",
+                "name": "Battery",
+                "roles": 
+                [
                     {
-                        "class": "ml40::MachineOperatingStatus",
-                        "status": "defekt"
+                        "class": "fml40::Battery"
+                    },
+                ],
+                "features": 
+                [
+                    {
+                        "class": "ml40::BatteryStatus",
+                        "voltage": 0,
                     },
                 ]
             },
             ]
         },
         {
-        "class": "ml40::ProvidesMachineData",
-        },
-        {
-        "class": "ml40::OperatingHours",
-        "total": 0
+        "class": "ml40::Time",
+        "time": 0
         },
     ]
   }
 }
+
+# {
+#     "class": "ml40::Thing",
+#     "name": "",
+#     "roles": [
+#         {
+#             "class": "ml40::TemperatureSensor"
+#         }
+#     ],
+#     "features": [
+#         {
+#             "class": "ml40::Temperature",
+#             "temperature": 50
+#         }
+#     ]
+# },
 
 class DemoHarvester(Thing):
     """
@@ -166,23 +257,23 @@ class DemoHarvester(Thing):
         setup_logger("Demo Harvester")
         super(DemoHarvester, self).__init__(loop=loop, entry=entry, connector=connector)
 
-    berechne_pm()
-    speichern #dps call
+    # berechne_pm()
+    # speichern #dps call
 
-    def simulate_operating_hours(self):
+    # def simulate_operating_hours(self):
         
          
         
-        self.loop.call_later(10, self.simulate_operating_hours)
+    #     self.loop.call_later(10, self.simulate_operating_hours)
 
     def simulate_operating_hours(self):
         """
         Recursively increases operating hours every 10 seconds.
 
         """
-        operating_hours = self.entry.features["ml40::OperatingHours"]
-        operating_hours.total += 0.1
-        APP_LOGGER.info("Current value: {}".format(operating_hours.total))
+        operating_hours = self.entry.features["ml40::Time"]
+        operating_hours.time += 0.1
+        APP_LOGGER.info("Current value: {}".format(operating_hours.time))
         # print(result)
         # mms = MaintenanceManagementService()
         # mms.run()
@@ -192,7 +283,7 @@ class DemoHarvester(Thing):
         """
         Recursively sends named event (update of ml40::OperationHours) every 10 seconds.
         """
-        current_operating_hours = self.entry.features["ml40::OperatingHours"].total
+        current_operating_hours = self.entry.features["ml40::Time"].time
 
         current_operating_hours = {
             "currentOperatingHours": round(current_operating_hours, 1)

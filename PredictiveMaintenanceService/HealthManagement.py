@@ -63,7 +63,7 @@ class HealthManagement(Observer):
                     "operational_condition": entry["configuration"]["operational_condition"],
                     "fault_diagnostic_health_status": entry["fault_diagnostic_report"].get("health_status", None),
                     "fault_location": entry["fault_diagnostic_report"].get("fault_location", None),
-                    "faulty_severity": entry["fault_diagnostic_report"].get("fault_severity", None),
+                    "fault_severity": entry["fault_diagnostic_report"].get("fault_severity", None),
                     # "prognostic_status": entry["prognostics_report"].get("prognostic_status", None),
                 }
     
@@ -80,14 +80,17 @@ class HealthManagement(Observer):
         advisories = {
             ('battery', 'engine_running'): "health problem",
             ('battery', 'engine_not_running'): "charging problem",
-            ('filter', self.integrated_data.get('operational_condition')): "high pressure detected",
+            ('filter', int): "high pressure detected",
         }
-        condition_key = (self.integrated_data['data_type'], self.integrated_data.get('operational_condition'))
-        analysis = advisories.get(condition_key, "Status normal or undetermined.")
+        if self.integrated_data['data_type'] == 'battery':
+            condition_key = (self.integrated_data['data_type'], self.integrated_data.get('operational_condition'))
+        if self.integrated_data['data_type'] == 'filter':
+            condition_key = (self.integrated_data['data_type'], type(self.integrated_data["fault_severity"]))
+        analysis = advisories.get(condition_key, "Status normal.")
         self.integrated_data["analysis"] = analysis
 
     def transmit_advisory(self):
-        # self.health_management_complete.emit(self.integrated_data)
+        self.health_management_complete.emit(self.integrated_data)
         logging.info("Advisory transmitted to the next class.")
         self.data.clear()
         self.organized_data.clear()
