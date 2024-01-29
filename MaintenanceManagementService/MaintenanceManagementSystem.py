@@ -135,6 +135,7 @@ class MaintenanceManagementService(Observer):
         self.inventory_manager = InventoryManager(
             self.parts_inventory, self.delivery_times
         )
+        self.j = 0
         #  self.delivery_times adjust code
 
         personnel = ["Technician1", "Technician2", "Engineer1", "Engineer2", "Engineer3"]
@@ -350,7 +351,6 @@ class MaintenanceManagementService(Observer):
         while not self.advisories.empty():
             self.advisory = self.advisories.get()
             self.evaluate_advisory()
-            self.generate_report()
 
     def evaluate_advisory(self):
         """Evaluate if maintenance is required based on the advisory."""
@@ -364,7 +364,11 @@ class MaintenanceManagementService(Observer):
         )
         if self.advisory["maintenance_required"]:
             self.determine_required_maintenance_action()
+            self.generate_report()
         else:
+            # TODO
+            # suan: {'maintenance_required': False}
+            # istenilen: diger bilgiler kaybolmasin
             self.generate_report()
 
     def determine_required_maintenance_action(self):
@@ -519,26 +523,30 @@ class MaintenanceManagementService(Observer):
         # update system-wide status to reflect the planned maintenance
 
     def generate_report(self):
+
         advisory = self.advisory
-        report = {
-            "MAINTENANCE REPORT ID": self.advisory.get('data_type', 'N/A'),
-            "ANALYSIS": {
+        self.reports[self.j] = {
+            "Maintenance Report Type": self.advisory.get('data_type', 'N/A'),
+            "Analysis": {
                 "Operational Condition": self.advisory.get('operational_condition', 'N/A'),
                 "Health Status": self.advisory.get('fault_diagnostic_health_status', 'N/A'),
                 "Fault Location": self.advisory.get('fault_location', 'N/A'),
                 "Time Detected": self.advisory.get('datetime', 'N/A'),
                 "Fault Severity (1-5 scale)": self.advisory.get('faulty_severity', 'N/A'),
-                "Fault Severity": self.advisory.get('fault_severity', 'N/A'),  # for second advisory compatibility
                 "Analysis": self.advisory.get('analysis', 'N/A'),
                 "Maintenance Required": self.advisory.get('maintenance_required', 'N/A')
             }
         }
+        self.j += 1
 
         # Convert the report dictionary to a JSON string
-        self.report_json = json.dumps(report, indent=4)
+        # self.report_json = json.dumps(report, indent=4)
     
-    def get_report(self):
-        return self.report_json
+    def get_reports(self):
+        all_reports = self.reports
+        self.reports = {}
+        self.j = 0
+        return all_reports
         # report.append(f"MAINTENANCE REPORT ID: {advisory['data_type']}")
         # report.append("=" * 50)
         # report.append("ANALYSIS:")

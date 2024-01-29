@@ -127,9 +127,8 @@ class InformationGateway(Observer):
     def __del__(self):
         self.conn.close()
 
-class DataProviderService(ProvidesMachineData):
+class DataProviderService():
     def __init__(self, name="", identifier=""):
-        super(ProvidesMachineData, self).__init__(name=name, identifier=identifier)
         self.MachineData = {}
         self.physical_twin = PhysicalTwinSimulation()
         self.data_gateway = DataAcquisitionGateway()
@@ -142,42 +141,42 @@ class DataProviderService(ProvidesMachineData):
         self.db_file_path = "C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/can_data_processed_23112023.db"
         
 
-    async def getMachineData(self, data=None):
+    def getMachineData(self, data=None):
         i = 1
         self.conn = sqlite3.connect(self.db_file_path)
         query = f"SELECT * FROM ProcessedCANData LIMIT 1 OFFSET {i}"
         df = pd.read_sql_query(query, self.conn)
         data = df.to_dict('records')[0]
         self.MachineData["timestamp"] = data["timestamp"]
-        self.MachineData["Supply_Press"] = data["Supply_Press"]
-        self.MachineData["RetFilt_Press"] = data["RetFilt_Press"]
-        self.MachineData["DrFor_Press"] = data["DrFor_Press"]
-        self.MachineData["DrBack_Press"] = data["DrBack_Press"]
-        self.MachineData["Cab_Angle"] = data["Cab_Angle"]
-        self.MachineData["FrameLR_Angle"] = data["FrameLR_Angle"]
-        self.MachineData["FrameFB_Angle"] = data["FrameFB_Angle"]
-        self.MachineData["WorkPump_Press"] = data["WorkPump_Press"]
-        self.MachineData["WorkPump_Q"] = data["WorkPump_Q"]
-        self.MachineData["HeadPump_Angle"] = data["HeadPump_Angle"]
-        self.MachineData["CraneSwivel_Angle"] = data["CraneSwivel_Angle"]
+        # self.MachineData["Supply_Press"] = data["Supply_Press"]
+        # self.MachineData["RetFilt_Press"] = data["RetFilt_Press"]
+        # self.MachineData["DrFor_Press"] = data["DrFor_Press"]
+        # self.MachineData["DrBack_Press"] = data["DrBack_Press"]
+        # self.MachineData["Cab_Angle"] = data["Cab_Angle"]
+        # self.MachineData["FrameLR_Angle"] = data["FrameLR_Angle"]
+        # self.MachineData["FrameFB_Angle"] = data["FrameFB_Angle"]
+        # self.MachineData["WorkPump_Press"] = data["WorkPump_Press"]
+        # self.MachineData["WorkPump_Q"] = data["WorkPump_Q"]
+        # self.MachineData["HeadPump_Angle"] = data["HeadPump_Angle"]
+        # self.MachineData["CraneSwivel_Angle"] = data["CraneSwivel_Angle"]
         self.MachineData["RPM_Diesel"] = data["RPM_Diesel"]
-        self.MachineData["Cool_Temp"] = data["Cool_Temp"]
-        self.MachineData["Oil_Temp"] = data["Oil_Temp"]
-        self.MachineData["Amb_Temp"] = data["Amb_Temp"]
+        # self.MachineData["Cool_Temp"] = data["Cool_Temp"]
+        # self.MachineData["Oil_Temp"] = data["Oil_Temp"]
+        # self.MachineData["Amb_Temp"] = data["Amb_Temp"]
         self.MachineData["FuelPressure"] = data["FuelPressure"]
-        self.MachineData["ChargedAir_Press"] = data["ChargedAir_Press"]
+        # self.MachineData["ChargedAir_Press"] = data["ChargedAir_Press"]
         self.MachineData["Bat_Volt"] = data["Bat_Volt"]
-        self.MachineData["Oil_Press"] = data["Oil_Press"]
-        self.MachineData["Engine_Load"] = data["Engine_Load"]
-        self.MachineData["RPM_DriveMot"] = data["RPM_DriveMot"]
-        self.MachineData["Speed"] = data["Speed"]
-        self.MachineData["Steering_Angle"] = data["Steering_Angle"]
-        self.MachineData["Drive_Dir"] = data["Drive_Dir"]
+        # self.MachineData["Oil_Press"] = data["Oil_Press"]
+        # self.MachineData["Engine_Load"] = data["Engine_Load"]
+        # self.MachineData["RPM_DriveMot"] = data["RPM_DriveMot"]
+        # self.MachineData["Speed"] = data["Speed"]
+        # self.MachineData["Steering_Angle"] = data["Steering_Angle"]
+        # self.MachineData["Drive_Dir"] = data["Drive_Dir"]
         i = i + 1
-        return True
+        return self.MachineData.values()
         
 # machine_data_provider = DataProviderService()
 # asyncio.run(machine_data_provider.getMachineData())
 
-machine_data_provider = DataProviderService()
-machine_data_provider.getMachineData()
+# machine_data_provider = DataProviderService()
+# machine_data_provider.getMachineData()
