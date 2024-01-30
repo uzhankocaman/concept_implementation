@@ -804,3 +804,35 @@
 2024-01-31 02:52:59,242 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Broker]: Connection built via AMQP
 2024-01-31 02:53:27,670 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: Start the thing identified as s3i:c2c713c4-910f-405f-86af-e2ce67f6bea5 and named as Maintenance Analysis Harvester
 2024-01-31 02:54:10,190 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: Start the thing identified as s3i:c2c713c4-910f-405f-86af-e2ce67f6bea5 and named as Maintenance Analysis Harvester
+2024-01-31 02:55:06,198 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: Start the thing identified as s3i:c2c713c4-910f-405f-86af-e2ce67f6bea5 and named as Maintenance Analysis Harvester
+2024-01-31 02:55:06,477 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][IdentityProvider]: Connection built
+2024-01-31 02:55:06,477 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][IdentityProvider]: Access Token granted
+2024-01-31 02:55:06,478 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Config]: Connection built
+2024-01-31 02:55:06,942 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Directory]: Connection built
+2024-01-31 02:55:06,943 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventSystem]: Setup event system
+2024-01-31 02:55:07,444 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: Connection built via AMQP
+2024-01-31 02:55:07,690 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Repository]: Connection built
+2024-01-31 02:55:07,963 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Broker]: Connection built via AMQP
+2024-01-31 02:55:08,418 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:08,907 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:09,404 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:09,916 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:10,416 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:10,918 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:11,416 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:11,917 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:12,402 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:12,915 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:13,415 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:13,915 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:14,411 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:14,911 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:15,409 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:15,909 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:16,405 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:16,902 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:17,416 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:17,914 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:18,402 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:18,905 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
+2024-01-31 02:55:19,408 - ERROR - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: content should be typed as dict
