@@ -85,7 +85,7 @@ class InformationGateway(Observer):
 
     def handle_event(self, data):
         self.last_data = data
-        self.store_sensor_data(data)
+        # self.store_sensor_data(data)
 
     # def register_callback(self, callback_function):
     #     self.callback = callback_function
@@ -129,16 +129,15 @@ class InformationGateway(Observer):
 
     def get_data(self):
         # Implement logic to get the desired data
-        # Current version gives only last data
-        if True: # Testing purposes
-            self.MachineData = list(self.df.iloc[self.i][["timestamp", "RPM_Diesel", "FuelPressure", "Bat_Volt"]])
-            self.i = self.i + 1
-            if not any(math.isnan(item) for item in self.MachineData):
-                print("=====")
-                print(self.i)
-                print("=====")
-                return self.MachineData
-            return None
+        # if True: # Testing purposes
+        #     self.MachineData = list(self.df.iloc[self.i][["timestamp", "RPM_Diesel", "FuelPressure", "Bat_Volt"]])
+        #     self.i = self.i + 1
+        #     if not any(math.isnan(item) for item in self.MachineData):
+        #         print("=====")
+        #         print(self.i)
+        #         print("=====")
+        #         return self.MachineData
+        #     return None
         if self.last_data is not None and not any(math.isnan(value) for value in self.last_data.values() if isinstance(value, float)):
             self.MachineData["timestamp"] = self.last_data["timestamp"]
             self.MachineData["RPM_Diesel"] = self.last_data["RPM_Diesel"]
@@ -176,9 +175,9 @@ class DataProviderService():
     def __init__(self):
         self.config = self.load_config()
         self.MachineData = {}
-        # self.data_gateway = DataAcquisitionGateway(self.config['can_encoder'])
+        self.data_gateway = DataAcquisitionGateway(self.config['can_encoder'])
         self.information_gateway = InformationGateway(self.config["db_file_path"])
-        # self.data_gateway.on_acquisition.subscribe(self.information_gateway)
+        self.data_gateway.on_acquisition.subscribe(self.information_gateway)
 
     @staticmethod
     def load_config():

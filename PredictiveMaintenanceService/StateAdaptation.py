@@ -148,11 +148,6 @@ class StateAdaptation(Observer):
 
     def tune_model_based_on_optimization_criteria(self):
         """ Calls the appropriate models based on optimization criteria (such as cost-efficiency) derived from machine. """
+        # placeholder
         model_configuration = {"precision": "model-1", "recall": "model-2"}
         self.model = model_configuration["precision"]
-
-
-# data_processor = DataProcessing()
-# state_adaptation = StateAdaptation()
-# data_processor.on_data_processed.subscribe(state_adaptation)
-# data_processor.process_data('battery')

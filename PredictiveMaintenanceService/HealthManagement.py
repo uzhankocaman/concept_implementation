@@ -62,6 +62,7 @@ class HealthManagement(Observer):
                     "data_type": entry["configuration"]["data_type"],
                     "operational_condition": entry["configuration"]["operational_condition"],
                     "fault_diagnostic_health_status": entry["fault_diagnostic_report"].get("health_status", None),
+                    "fault_diagnostic_health_metric": entry["fault_diagnostic_report"].get("health", None),
                     "fault_location": entry["fault_diagnostic_report"].get("fault_location", None),
                     "fault_severity": entry["fault_diagnostic_report"].get("fault_severity", None),
                     # "prognostic_status": entry["prognostics_report"].get("prognostic_status", None),
@@ -78,12 +79,12 @@ class HealthManagement(Observer):
 
     def create_advisory_based_on_data(self):
         advisories = {
-            ('battery', 'engine_running'): "health problem",
-            ('battery', 'engine_not_running'): "charging problem",
+            ('battery', int): "health problem",
+            ('battery', int): "charging problem",
             ('filter', int): "high pressure detected",
         }
         if self.integrated_data['data_type'] == 'battery':
-            condition_key = (self.integrated_data['data_type'], self.integrated_data.get('operational_condition'))
+            condition_key = (self.integrated_data['data_type'], type(self.integrated_data["fault_severity"]))
         if self.integrated_data['data_type'] == 'filter':
             condition_key = (self.integrated_data['data_type'], type(self.integrated_data["fault_severity"]))
         analysis = advisories.get(condition_key, "Status normal.")

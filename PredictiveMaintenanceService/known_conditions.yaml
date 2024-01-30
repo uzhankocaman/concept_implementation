@@ -1,7 +1,7 @@
 battery:
   battery_disconnected: -0.1 <= x <= 0.1
-  engine_not_running: 20 <= x <= 25
-  engine_running: 25 <= x <= 29.01
+  engine_not_running: 15 <= x <= 25
+  engine_running: 25 <= x <= 29
 filter:
   slope: 0.00073697 
   intercept: 3.817896598686353

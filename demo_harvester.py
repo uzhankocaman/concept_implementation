@@ -244,7 +244,7 @@ class MaintenanceAnalysisHarvester(Thing):
 
     def service_call(self):
         data = self.data_provider.information_gateway.get_data()
-        if data is not None and not any(math.isnan(item) for item in data):
+        if data is not None:
             print(data)
             self.entry.features["ml40::Time"].time, self.entry.features["ml40::Composite"].targets["Diesel Engine"].features["ml40::RotationalSpeed"].rpm, self.entry.features["ml40::Composite"].targets["Fuel Filter"].features["ml40::Pressure"].pressure, self.entry.features["ml40::Composite"].targets["Battery"].features["ml40::BatteryStatus"].voltage = data
             # pm
@@ -252,15 +252,15 @@ class MaintenanceAnalysisHarvester(Thing):
             self.data_acquisition.collect_data(self.entry, 'battery')
             self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"] = self.maintenance_management.get_reports()
             print(self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"])
-            self.data_provider.information_gateway.store_maintenance_data(self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"])
+            # self.data_provider.information_gateway.store_maintenance_data(self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"])
         else:
-            print("No data found")
+            print("Waiting for data...")
         # speichern dps call
         self.loop.call_later(0.5, self.service_call)
 
     def send_event_maintenance_information(self):
         # msg = self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent
-        msg = {"reports": 999}
+        msg = self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"]
         self.connector.add_broker_event_message_to_send(
             "{}.{}".format(self.entry.identifier, "newMaintenanceInformation"), msg)
         self.loop.call_later(0.5, self.send_event_maintenance_information)

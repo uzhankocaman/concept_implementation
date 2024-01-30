@@ -9,7 +9,7 @@ battery:
     Vmin: 20
   engine_running:
     Vfull_original: 28.5
-    Vmax: 29.01
+    Vmax: 29
     Vmin: 25
 filter:
   Popt: 5

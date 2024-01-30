@@ -1,13 +1,9 @@
 import pandas as pd
 import logging
 import yaml
-# from PredictiveMaintenanceService.observer_pattern import Event, Observer
 from utilities.observer_pattern import Event, Observer
 from datetime import datetime
 
-# from DataProcessing import DataProcessing
-# from StateAdaptation import StateAdaptation
-#done
 class FaultDiagnostic(Observer):
     def __init__(self):
         super().__init__()
@@ -20,20 +16,14 @@ class FaultDiagnostic(Observer):
             "battery": {"soc": self.calculate_soc, "soh": self.calculate_soh},
             "filter": {"sof": self.calculate_sof},
         }
-        self.model_metric = {"battery": {"soc": 99, "soh": 90}, "filter": {"sof": 102}} 
+        self.model_metric = {"battery": {"soc": 70, "soh": 70}, "filter": {"sof": 111}} 
     
     def handle_event(self, data):
-        print("FDA handle_event 1")
         self.data = data
-        print("FDA handle_event 2")
         self.run()
-        print("FDA handle_event 3")
         self.fault_state_assessed.emit(self.data)
-        print("FDA handle_event 4")
         self.data = None
-        print("FDA handle_event 5")
         self.model_deployed = None
-        print("FDA handle_event 6")
 
     def run(self):
         """
@@ -56,7 +46,7 @@ class FaultDiagnostic(Observer):
         params = self.model_params[self.data["configuration"]["data_type"]][self.data["configuration"]["operational_condition"]]
         Vmin = params['Vmin']
         Vmax = params['Vmax']
-        SoC = abs(((self.data["scale_value_Bat_Volt"] - Vmin) / (Vmax - Vmin))) * 100 # normally you would have to define the measure of interest 'scaled_Bat_Volt' somewhere else.
+        SoC = abs(((self.data["scale_value_Bat_Volt"]) / (Vmax))) * 100 # normally you would have to define the measure of interest 'scaled_Bat_Volt' somewhere else.
         return SoC
     
     def calculate_soh(self):
@@ -141,6 +131,7 @@ class FaultDiagnostic(Observer):
     def process_fault(self):
         return {
             "health_status": self.data["health_status"],
+            "health": self.data["health"],
             "fault_time": datetime.now(), #self.data["timestamp"]
             "fault_location": self.data["configuration"]["data_type"],
             "fault_severity": self.calc_severity()

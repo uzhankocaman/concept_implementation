@@ -495,15 +495,13 @@ class MaintenanceManagementService(Observer):
         # update system-wide status to reflect the planned maintenance
 
     def generate_report(self):
-
         advisory = self.advisory
         self.reports[self.j] = {
                 "Maintenance Report Type": self.advisory.get('data_type', 'N/A'),
                 "Analysis": {
                     "Operational Condition": self.advisory.get('operational_condition', 'N/A'),
-                    "Health Status": self.advisory.get('fault_diagnostic_health_status', 'N/A'),
                     "Fault Location": self.advisory.get('fault_location', 'N/A'),
-                    "Time Detected": self.advisory.get('datetime', 'N/A'),
+                    "Time of Analysis": self.advisory.get('datetime', 'N/A'),
                     "Fault Severity (1-5 scale)": self.advisory.get('faulty_severity', 'N/A'),
                     "Analysis": self.advisory.get('analysis', 'N/A'),
                     "Maintenance Required": self.advisory.get('maintenance_required', 'N/A')
@@ -516,50 +514,32 @@ class MaintenanceManagementService(Observer):
                     "Urgency": self.advisory.get("required", {}).get("urgency", 'N/A')
                 }
             }
-
+        
+        self.reports[self.j] = self.generate_filtered_report()
         self.j += 1
 
-        # Convert the report dictionary to a JSON string
-        # self.report_json = json.dumps(report, indent=4)
-    
+    def generate_filtered_report(self):
+        filtered_report = {}
+        for key, value in self.reports[self.j].items():
+            if isinstance(value, dict):  # Check if the value is a dictionary
+                filtered_report[key] = {}
+                for sub_key, sub_value in value.items():
+                    if sub_value != 'N/A':
+                        filtered_report[key][sub_key] = sub_value
+                if not filtered_report[key]:
+                    del filtered_report[key]
+            else:
+                if value != 'N/A':
+                    filtered_report[key] = value
+        
+        return filtered_report
+
     def get_reports(self):
         all_reports = self.reports
         self.reports = {}
         self.j = 0
         return all_reports
-        # report.append(f"MAINTENANCE REPORT ID: {advisory['data_type']}")
-        # report.append("=" * 50)
-        # report.append("ANALYSIS:")
-        # report.append(f"  Fault Detected: {advisory['fault']}")
-        # report.append(f"  Location: {advisory['fault_location']}")
-        # report.append(f"  Time Detected: {advisory['fault_time'].strftime('%Y-%m-%d %H:%M:%S')}")
-        # report.append(f"  Fault Severity (1-5 scale): {advisory['fault_severity']}")
-        # report.append(f"  Equipment Degradation Severity (1-5 scale): {advisory['degradation_severity']}")
-        # report.append(f"  Maintenance Required: {'Yes' if advisory['maintenance_required'] else 'No'}")
-        # report.append("-" * 50)
-        # required_action = advisory.get('required', {})
-        # report.append("MAINTENANCE ACTION PLAN:")
-        # report.append(f"  Proposed Action: {required_action.get('action', 'N/A')}")
-        # report.append(f"  Affected Component: {required_action.get('component', 'N/A')}")
-        # report.append(f"  Urgency Level: {required_action.get('urgency', 'N/A')}")
-        # delay = required_action.get('delay_due_missing_part', 0)
-        # report.append(f"  Delay Due to Missing Parts: {delay} day(s)" if delay else "  No Delay Expected")
-        # report.append("-" * 50)
-        # schedule_date = advisory.get('schedule', 'N/A')
-        # assigned_personnel = advisory.get('assigned_personnel', 'Unassigned')
-        # report.append("SCHEDULING AND PERSONNEL ASSIGNMENT:")
-        # report.append(f"  Maintenance Scheduled On: {schedule_date}")
-        # report.append(f"  Assigned Maintenance Personnel: {assigned_personnel}")
-        # report.append("=" * 50)
-        # self.reports[f"{self.advisory['data_type']}"] = " \n".join(report)
-        # pp = pprint.PrettyPrinter(indent=4)
-        # pp.pprint(self.reports[f"{self.advisory['data_type']}"])
 
     def store_reports(self):
         """Storing the report in a persistent storage."""
         # store in database
-
-
-# mms = MaintenanceManagementService()
-# mms.run()
-# print("hello")
