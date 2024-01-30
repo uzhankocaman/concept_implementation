@@ -4,12 +4,12 @@ battery:
     Vmax: 0.1
     Vmin: -0.1
   engine_not_running:
-    Vfull_original: 24
+    Vfull_original: 24.5
     Vmax: 25
-    Vmin: 22
+    Vmin: 20
   engine_running:
     Vfull_original: 28.5
-    Vmax: 28.5
+    Vmax: 29.01
     Vmin: 25
 filter:
   Popt: 5

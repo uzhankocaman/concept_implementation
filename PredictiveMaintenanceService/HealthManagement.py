@@ -90,7 +90,8 @@ class HealthManagement(Observer):
         self.integrated_data["analysis"] = analysis
 
     def transmit_advisory(self):
-        self.health_management_complete.emit(self.integrated_data)
+        advisory = self.integrated_data
+        self.health_management_complete.emit(advisory)
         logging.info("Advisory transmitted to the next class.")
         self.data.clear()
         self.organized_data.clear()

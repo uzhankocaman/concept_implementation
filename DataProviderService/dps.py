@@ -14,10 +14,11 @@ import sqlite3
 import pandas as pd
 import sqlite3
 import pandas as pd
-
+import math
 import paho.mqtt.client as mqtt
 import json
 import base64
+from pandas import Timestamp
 
 broker_address = "localhost" 
 port = 1883  
@@ -78,9 +79,13 @@ class InformationGateway(Observer):
         self.db_file_path = db_file_path
         self.conn = sqlite3.connect(self.db_file_path)
         self.MachineData = {}
+        # Testing:
+        self.df = pd.read_excel("C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/DataProviderService/test_sample.xlsx")
+        self.i = 67
 
     def handle_event(self, data):
         self.last_data = data
+        self.store_sensor_data(data)
 
     # def register_callback(self, callback_function):
     #     self.callback = callback_function
@@ -89,23 +94,31 @@ class InformationGateway(Observer):
     #     return self.data
 
     def store_sensor_data(self, data):
+        serialized_data = json.dumps(data)
+
         self.conn.execute('''CREATE TABLE IF NOT EXISTS SensorData
-                             (ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                              Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                              Data TEXT)''')
-        
+                            (ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                            Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            Data TEXT)''')
+
         query = "INSERT INTO SensorData (Data) VALUES (?)"
-        self.conn.execute(query, (data,))
+        self.conn.execute(query, (serialized_data,))  
         self.conn.commit()
 
     def store_maintenance_data(self, data):
+        def default_serializer(obj):
+            if isinstance(obj, Timestamp):
+                return obj.isoformat()  # Convert Timestamp to ISO 8601 string
+
+        serialized_data = json.dumps(data, default=default_serializer)
+
         self.conn.execute('''CREATE TABLE IF NOT EXISTS MaintenanceData
-                             (ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                              Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                              Data TEXT)''')
-        
+                            (ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                            Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            Data TEXT)''')
+
         query = "INSERT INTO MaintenanceData (Data) VALUES (?)"
-        self.conn.execute(query, (data,))
+        self.conn.execute(query, (serialized_data,))
         self.conn.commit()
 
     def read_db(self, i):
@@ -117,7 +130,16 @@ class InformationGateway(Observer):
     def get_data(self):
         # Implement logic to get the desired data
         # Current version gives only last data
-        if self.last_data != None:
+        if True: # Testing purposes
+            self.MachineData = list(self.df.iloc[self.i][["timestamp", "RPM_Diesel", "FuelPressure", "Bat_Volt"]])
+            self.i = self.i + 1
+            if not any(math.isnan(item) for item in self.MachineData):
+                print("=====")
+                print(self.i)
+                print("=====")
+                return self.MachineData
+            return None
+        if self.last_data is not None and not any(math.isnan(value) for value in self.last_data.values() if isinstance(value, float)):
             self.MachineData["timestamp"] = self.last_data["timestamp"]
             self.MachineData["RPM_Diesel"] = self.last_data["RPM_Diesel"]
             self.MachineData["FuelPressure"] = self.last_data["FuelPressure"]
@@ -154,11 +176,9 @@ class DataProviderService():
     def __init__(self):
         self.config = self.load_config()
         self.MachineData = {}
-        self.data_gateway = DataAcquisitionGateway(self.config['can_encoder'])
+        # self.data_gateway = DataAcquisitionGateway(self.config['can_encoder'])
         self.information_gateway = InformationGateway(self.config["db_file_path"])
-        # self.information_gateway.register_callback(self.getMachineData)
-        self.data_gateway.on_acquisition.subscribe(self.information_gateway)
-        # self.db_file_path = self.config["db_file_path"]
+        # self.data_gateway.on_acquisition.subscribe(self.information_gateway)
 
     @staticmethod
     def load_config():

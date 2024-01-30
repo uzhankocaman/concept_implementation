@@ -18,7 +18,7 @@ import json
 from queue import Queue
 import pprint
 from collections import defaultdict
-
+import threading
 from datetime import datetime
 from typing import List
 import logging
@@ -27,7 +27,7 @@ import queue
 import random
 import threading
 import time
-
+import copy
 import random
 import numpy as np
 from datetime import datetime, timedelta
@@ -38,7 +38,7 @@ import os
 import logging
 
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+# from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from utilities.observer_pattern import Event, Observer
 # from .monitoring import MonitoringUI
 
@@ -137,7 +137,7 @@ class MaintenanceManagementService(Observer):
         )
         self.j = 0
         #  self.delivery_times adjust code
-
+        self.lock = threading.Lock()
         personnel = ["Technician1", "Technician2", "Engineer1", "Engineer2", "Engineer3"]
         self.personnel_system = PersonnelManager(personnel)
         self.personnel_system.add_personnel_skills("Technician1", {"replace"})
@@ -145,7 +145,7 @@ class MaintenanceManagementService(Observer):
         self.personnel_system.add_personnel_skills("Engineer1", {"inspect", "repair"})
         self.personnel_system.add_personnel_skills("Engineer2", {"inspect", "repair"})
         self.personnel_system.add_personnel_skills("Engineer3", {"inspect", "repair"})
-
+        self.advisories = Queue()
         self.reports = {}
 
     def load_state(self):
@@ -186,10 +186,10 @@ class MaintenanceManagementService(Observer):
             # Load advisories and task_queue
             cursor.execute("SELECT value FROM system_state WHERE key = 'advisories'")
             result = cursor.fetchone()
-            advisories_list = json.loads(result[0]) if result else []
-            self.advisories = Queue()
-            for item in advisories_list:
-                self.advisories.put(item)
+            # advisories_list = json.loads(result[0]) if result else []
+            # # self.advisories = Queue()
+            # for item in advisories_list:
+            #     self.advisories.put(item)
 
             cursor.execute("SELECT value FROM system_state WHERE key = 'task_queue'")
             result = cursor.fetchone()
@@ -200,7 +200,7 @@ class MaintenanceManagementService(Observer):
         except sqlite3.Error as e:
             # Initialize with empty values in case of an error
             print(f"Database error: {e}")
-            self.advisories = Queue()
+            # self.advisories = Queue()
             self.maintenance_required = True
             self.constraints = None
             self.parts_inventory = {}  # Example inventory
@@ -263,7 +263,6 @@ class MaintenanceManagementService(Observer):
         conn = sqlite3.connect("maintenance_management.db")
         cursor = conn.cursor()
 
-        # Create tables if they don't exist
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS system_state (
@@ -288,7 +287,7 @@ class MaintenanceManagementService(Observer):
         """
         )
 
-        # Add other table creation statements as needed
+
         cursor.execute(
             "INSERT OR REPLACE INTO system_state (key, value) VALUES ('maintenance_required', ?)",
             (True,),
@@ -296,55 +295,27 @@ class MaintenanceManagementService(Observer):
         cursor.execute(
             "INSERT OR REPLACE INTO system_state (key, value) VALUES ('constraints', ?)",
             (json.dumps(0),),
-        )  # Assuming 'constraints' is an integer, adjust as needed
+        ) 
 
         conn.commit()
         conn.close()
 
     def handle_event(self, data):
-        self.receive_maintenance_advisory(data)
-        if len(list(self.advisories.queue)) == 2: #wait for all advisories to process
-            self.run()
-        else:
-            logging.info("Waiting for conditions to be met to process advisories.")
+        print("test")
+        with self.lock: 
+            self.receive_maintenance_advisory(data)
+            if self.advisories.qsize() == 2: #wait for all advisories to process
+                self.run()
+            else:
+                logging.info("Waiting for conditions to be met to process advisories.")
     
     def run(self):
-        # self.receive_maintenance_advisories(
-        #     [
-        #         {
-        #             "id": 1,
-        #             "fault": "high pressure detected",
-        #             "fault_location": "fuel filter",
-        #             "fault_time": datetime.now(),
-        #             "fault_severity": 4,
-        #             "degradation_severity": 0,
-        #         },
-        #         {
-        #             "id": 22,
-        #             "fault": "high pressure detected",
-        #             "fault_location": "fuel filter",
-        #             "fault_time": datetime.now(),
-        #             "fault_severity": 4,
-        #             "degradation_severity": 0,
-        #         },
-        #     ]
-        # )
-        # advisory1 = {'datetime': '2023-11-23 13:55:27.089999', 'data_type': 'battery', 'operational_condition': 'engine_running', 'fault_diagnostic_health_status': False, 'fault_location': 'battery', 'fault_severity': 1.0, 'analysis': 'health problem'}
-        # advisory12 = {'datetime': '2023-11-23 13:55:27.089999', 'data_type': 'battery', 'operational_condition': 'engine_running', 'fault_diagnostic_health_status': True, 'fault_location': 'battery', 'fault_severity': 5.0, 'analysis': 'health problem'}
-        # advisory2 = {'datetime': '2023-11-23 13:55:27.089999', 'data_type': 'filter', 'operational_condition': 4.406735628686353, 'fault_diagnostic_health_status': True, 'fault_location': None, 'fault_severity': None, 'analysis': 'high pressure detected'}
-        
-        # self.advisories.put(advisory1)
-        # self.advisories.put(advisory12)
-        # self.advisories.put(advisory2)
         self.process_maintenance_needs()
-        # self.real_time_monitoring()
         self.update_system_status()
-        # self.store_reports()
-        # self.save_state()
 
     def receive_maintenance_advisory(self, advisory):
         """Receive advisories and add them to the advisories list."""
-        self.advisories.put(advisory)
+        self.advisories.put(copy.deepcopy(advisory))
 
     def process_maintenance_needs(self):
         """Analyze the advisories to understand maintenance needs."""
@@ -366,9 +337,6 @@ class MaintenanceManagementService(Observer):
             self.determine_required_maintenance_action()
             self.generate_report()
         else:
-            # TODO
-            # suan: {'maintenance_required': False}
-            # istenilen: diger bilgiler kaybolmasin
             self.generate_report()
 
     def determine_required_maintenance_action(self):
@@ -403,7 +371,6 @@ class MaintenanceManagementService(Observer):
                 "component": "filter",
                 "urgency": "scheduled",
             }
-
         if self.advisory['data_type'] == 'battery' and self.advisory['analysis'] == 'health problem':
             severity = self.advisory['fault_severity']
             if severity > 4:
@@ -420,13 +387,13 @@ class MaintenanceManagementService(Observer):
                 }
             else:  # severity < 2
                 self.advisory["required"] = {
-                    "action": "routine inspection",
+                    "action": "inspect",
                     "component": "battery",
                     "urgency": "scheduled",
                 }
         else:
-            self.advisory['maintenance_advisory'] = {
-                "action": "none",
+            self.advisory['required'] = {
+                "action": "N/A",
                 "component": "N/A",
                 "urgency": "N/A",
             }
@@ -438,15 +405,15 @@ class MaintenanceManagementService(Observer):
     def apply_constraints_to_maintenance_action(self):
         """Apply cost constraints to the maintenance action."""
         costs = {"replace": 110, "inspect": 20, "nothing": 0}
-
-        if costs[self.advisory["required"]["action"]] > self.maintenance_budget():
-            if (
-                self.advisory["fault_severity"] != 5
-                and self.advisory["required"]["action"] == "replace"
-            ):
-                self.advisory["required"]["action"] = "inspect"
-            elif self.advisory["required"]["action"] == "inspect":
-                self.advisory["required"]["action"] = "nothing"
+        if self.advisory["required"]["action"] != "N/A":
+            if costs[self.advisory["required"]["action"]] > self.maintenance_budget():
+                if (
+                    self.advisory["fault_severity"] != 5
+                    and self.advisory["required"]["action"] == "replace"
+                ):
+                    self.advisory["required"]["action"] = "inspect"
+                elif self.advisory["required"]["action"] == "inspect":
+                    self.advisory["required"]["action"] = "nothing"
 
     def maintenance_budget(self):
         """Estimate the cost of a maintenance action."""
@@ -454,24 +421,25 @@ class MaintenanceManagementService(Observer):
 
     def check_availability_of_necessary_parts_and_tools(self):
         """Check if the necessary parts and tools are available."""
-        if self.advisory["required"]["action"] == "replace":
-            required_component = self.advisory["required"]["component"]
-            quantity_available = self.inventory_manager.get_inventory_level(
-                required_component
-            )
-
-            if quantity_available <= 0:
-                reorder_quantity = self.inventory_manager.determine_reorder_quantity(
+        if self.advisory["required"]["action"] != "N/A":
+            if self.advisory["required"]["action"] == "replace":
+                required_component = self.advisory["required"]["component"]
+                quantity_available = self.inventory_manager.get_inventory_level(
                     required_component
                 )
-                self.inventory_manager.order_new_inventory(
-                    required_component, reorder_quantity
-                )
-                self.advisory["required"]["delay_due_missing_part"] = self.inventory_manager.get_estimated_arrival_time(required_component)
-        else:
-            self.advisory["required"]["delay_due_missing_part"] = timedelta(days=0)
 
-        self.develop_maintenance_plan()
+                if quantity_available <= 0:
+                    reorder_quantity = self.inventory_manager.determine_reorder_quantity(
+                        required_component
+                    )
+                    self.inventory_manager.order_new_inventory(
+                        required_component, reorder_quantity
+                    )
+                    self.advisory["required"]["delay_due_missing_part"] = self.inventory_manager.get_estimated_arrival_time(required_component)
+            else:
+                self.advisory["required"]["delay_due_missing_part"] = timedelta(days=0)
+
+            self.develop_maintenance_plan()
 
     def develop_maintenance_plan(self):
         """Develop a detailed maintenance plan based on the available parts and tools."""
@@ -491,8 +459,12 @@ class MaintenanceManagementService(Observer):
             delay_due_personnel,
             urgency_task[self.advisory["required"]["urgency"]],
         )
-        schedule_datetime = datetime.strptime(self.advisory["datetime"], '%Y-%m-%d %H:%M:%S.%f')
-        schedule = schedule_datetime + delay
+        if isinstance(self.advisory["datetime"], str) and self.advisory["datetime"].startswith("Timestamp('"):
+            datetime_str = self.advisory["datetime"].split("'")[1]
+            schedule_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+        elif isinstance(self.advisory["datetime"], pd.Timestamp):
+            schedule_datetime = self.advisory["datetime"].to_pydatetime()
+            schedule = schedule_datetime + delay
         self.advisory["schedule"] = schedule
 
     def allocate_personnel_to_task(self):

@@ -97,7 +97,7 @@ class StateAdaptation(Observer):
         # Current version supporting battery only as it has discrete boundaries
         if self.category == 'battery':
             # Threshold optimization
-            max_extension = 5  # Maximum allowable extension for a condition boundary
+            max_extension = 0.1  # Maximum allowable extension for a condition boundary
             closest_condition = None
             closest_distance = float('inf')  # Initialize with a large number
 
@@ -129,18 +129,22 @@ class StateAdaptation(Observer):
                     if isinstance(condition_range, tuple):
                         # Check if data falls outside the lower boundary
                         if data > condition_range[1]:
-                            lower_bound = condition_range[1]
+                            lower_bound = float(condition_range[1])
                         # Check if data falls outside the upper boundary
                         elif data < condition_range[0] and (upper_bound is None or condition_range[0] < upper_bound):
-                            upper_bound = condition_range[0]
+                            upper_bound = float(condition_range[0])
 
                 # Create a new range for the condition
-                new_condition_range = (lower_bound + 0.1 if lower_bound is not None else data - 1, 
-                                    upper_bound - 0.1 if upper_bound is not None else data + 1)
+                try:
+                    new_condition_range = (lower_bound + 0.1 if lower_bound is not None else data - 1, 
+                                        upper_bound - 0.1 if upper_bound is not None else data + 1)
+                    # Create a new condition with this range
+                    new_condition_name = f"new_condition_{len(self.known_conditions[self.category]) + 1}"
+                    self.known_conditions[self.category][new_condition_name] = lambda x: new_condition_range[0] <= x <= new_condition_range[1]
+                except TypeError:
+                    print("TypeError")
 
-                # Create a new condition with this range
-                new_condition_name = f"new_condition_{len(self.known_conditions[self.category]) + 1}"
-                self.known_conditions[self.category][new_condition_name] = lambda x: new_condition_range[0] <= x <= new_condition_range[1]
+                
 
     def tune_model_based_on_optimization_criteria(self):
         """ Calls the appropriate models based on optimization criteria (such as cost-efficiency) derived from machine. """
