@@ -9,7 +9,7 @@ from sklearn.impute import SimpleImputer
 from scipy.stats import zscore
 import numpy as np
 
-from DataProviderService.observer_pattern import Event, Observer
+from utilities.observer_pattern import Event, Observer
 
 #consider NAN values
 

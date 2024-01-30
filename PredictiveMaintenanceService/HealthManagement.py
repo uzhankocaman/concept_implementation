@@ -1,6 +1,6 @@
 # {'health_status': False, 'fault_time': datetime.datetime(2024, 1, 22, 8, 25, 2, 524487), 'fault_location': 'battery', 'fault_severity': 1.0}
 # {'health_status': True}
-from DataProviderService.observer_pattern import Observer, Event
+from utilities.observer_pattern import Observer, Event
 import pandas as pd
 import logging
 import time

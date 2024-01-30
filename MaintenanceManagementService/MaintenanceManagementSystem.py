@@ -39,7 +39,7 @@ import logging
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from DataProviderService.observer_pattern import Event, Observer
+from utilities.observer_pattern import Event, Observer
 # from .monitoring import MonitoringUI
 
 class PersonnelManager:

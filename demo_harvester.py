@@ -13,7 +13,7 @@ from PredictiveMaintenanceService.HealthManagement import HealthManagement
 from MaintenanceManagementService.MaintenanceManagementSystem import MaintenanceManagementService
 from DataProviderService.dps import DataProviderService
 
-from DataProviderService.observer_pattern import Event, Observer
+from utilities.observer_pattern import Event, Observer
 """
 Serializes the DT modeling conform to ForestML 4.0.
 """
@@ -242,56 +242,30 @@ class MaintenanceAnalysisHarvester(Thing):
         self.health_management.health_management_complete.subscribe(self.maintenance_management)
 
     def service_call(self):
-        # dps   
-        # self.entry.features["ml40::Time"].time = 1700747727
-        # self.entry.features["ml40::Composite"].targets["Battery"].features["ml40::BatteryStatus"].voltage = 278
-        # self.entry.features["ml40::Composite"].targets["Fuel Filter"].features["ml40::Pressure"].pressure = 4.44
-        # self.entry.features["ml40::Composite"].targets["Diesel Engine"].features["ml40::RotationalSpeed"].rpm = 799
-        self.entry.features["ml40::Time"].time, self.entry.features["ml40::Composite"].targets["Diesel Engine"].features["ml40::RotationalSpeed"].rpm, self.entry.features["ml40::Composite"].targets["Fuel Filter"].features["ml40::Pressure"].pressure, self.entry.features["ml40::Composite"].targets["Battery"].features["ml40::BatteryStatus"].voltage = self.data_provider.getMachineData()
-        # pm
-        self.data_acquisition.collect_data(self.entry, 'battery')
-        self.data_acquisition.collect_data(self.entry, 'filter')
-        self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"] = self.maintenance_management.get_reports()
-        print(self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"])
-        # self.data_provider.information_gateway.store_db(reports)
-        # print("Hello")
-        # mms
+        data = self.data_provider.information_gateway.get_data()
+        if data is not None:
+            self.entry.features["ml40::Time"].time, self.entry.features["ml40::Composite"].targets["Diesel Engine"].features["ml40::RotationalSpeed"].rpm, self.entry.features["ml40::Composite"].targets["Fuel Filter"].features["ml40::Pressure"].pressure, self.entry.features["ml40::Composite"].targets["Battery"].features["ml40::BatteryStatus"].voltage = data
+            # pm
+            self.data_acquisition.collect_data(self.entry, 'battery')
+            self.data_acquisition.collect_data(self.entry, 'filter')
+            self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"] = self.maintenance_management.get_reports()
+            print(self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"])
+        else:
+            print("No data found")
         # speichern dps call
-        self.loop.call_later(10, self.service_call)
-
-    # def simulate_operating_hours(self):
-    #     """
-    #     Recursively increases operating hours every 10 seconds.
-
-    #     """
-    #     print("Start Variables")
-    #     print(self.entry.features["ml40::Composite"].targets["Diesel Engine"].features["ml40::RotationalSpeed"].rpm)
-    #     print(self.entry.features["ml40::Time"].time)
-    #     print(self.entry.features["ml40::Composite"].targets["Fuel Filter"].features["ml40::Pressure"].pressure)
-    #     print(self.entry.features["ml40::Composite"].targets["Battery"].features["ml40::BatteryStatus"].voltage)
-    #     print("End Variables")
-    #     operating_hours = self.entry.features["ml40::Time"]
-    #     operating_hours.time += 0.1
-    #     APP_LOGGER.info("Current value: {}".format(operating_hours.time))
-    #     # print(result)
-    #     # mms = MaintenanceManagementService()
-    #     # mms.run()
-    #     self.loop.call_later(10, self.simulate_operating_hours)
+        self.loop.call_later(1, self.service_call)
 
     def send_event_maintenance_information(self):
         # msg = self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent
         msg = {"reports": 999}
         self.connector.add_broker_event_message_to_send(
             "{}.{}".format(self.entry.identifier, "newMaintenanceInformation"), msg)
-        self.loop.call_later(10, self.send_event_maintenance_information)
+        self.loop.call_later(1, self.send_event_maintenance_information)
 
     def run(self):
         """
         Defines the run function, adds callback functions and start the event loop in a persistent module.
         """
-        # self.add_ml40_implementation(
-        #     DataProviderService, "ml40::ProvidesMachineData"
-        # )
         self.add_on_thing_start_ok_callback(self.service_call, True, False)
         self.connector.add_on_event_system_start_ok_callback(
             self.send_event_maintenance_information, True, False
@@ -304,11 +278,6 @@ def read_credentials_from_yaml(file_path):
         return credentials
     
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("-i", "--oauth2_id", type=str, help="OAuth2 Identifier of DT Harvester", required=True)
-    # parser.add_argument('-s', '--oauth2_secret', type=str, help='OAuth2 Secret of DT Harvester', required=True)
-    # args = parser.parse_args()
-    # har = DemoHarvester(oauth2_id=args.oauth2_id, oauth2_secret=args.oauth2_secret)
     credentials = read_credentials_from_yaml('credentials.yaml')
     oauth2_id = credentials['oauth2_id']
     oauth2_secret = credentials['oauth2_secret']    
@@ -317,5 +286,3 @@ if __name__ == "__main__":
         oauth2_secret=oauth2_secret,
     )
     har.run()
-
-# DataProviderService()

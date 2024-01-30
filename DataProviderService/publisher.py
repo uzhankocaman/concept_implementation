@@ -30,7 +30,7 @@ class PhysicalTwinSimulation:
     def __init__(self):
         # self.ready_to = Event() # Data Sharing Network
         self.config = self.load_config()
-        self.db = cantools.database.load_file(self.config['database_path'])
+        # self.db = cantools.database.load_file(self.config['database_path'])
         self.log_files_directory = self.config['log_files_directory']
         self.connection = self.config['connect']
         # self.connection = True
@@ -77,12 +77,11 @@ class PhysicalTwinSimulation:
                     data_package = {}
     
     def send_data(self, data_package): 
-        if self.j == 0: # Testing purposes
-            for key, value in data_package.items():
-                value['data'] = base64.b64encode(value['data']).decode('utf-8')
-            message = json.dumps(data_package) 
-            client.publish(topic, message)
-        # self.j = self.j + 1
+        # if self.j == 0: # Testing purposes
+        for key, value in data_package.items():
+            value['data'] = base64.b64encode(value['data']).decode('utf-8')
+        message = json.dumps(data_package) 
+        client.publish(topic, message)
 
 virtual_twin = PhysicalTwinSimulation()
 virtual_twin.access_canbus()

@@ -1,3 +1,5 @@
-database_path: 'C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/CAN_data/MassCAN_DBC_20231108_SmartForestry.dbc'
+can_encoder: 'C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/CAN_data/MassCAN_DBC_20231108_SmartForestry.dbc'
 log_files_directory: 'C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/CAN_data/20231123_harvester_can_pcan'
 connect: False
+db_file_path: "C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/can_data_processed_23112023.db"
+# db_storage_path: "C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/data/maintenance_data.db"
