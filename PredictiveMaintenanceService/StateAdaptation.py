@@ -1,5 +1,5 @@
 import pandas as pd
-from utilities.observer_pattern import Event, Observer
+from DataProviderService.observer_pattern import Event, Observer
 import yaml
 
 class StateAdaptation(Observer):

@@ -33,21 +33,24 @@ class PhysicalTwinSimulation:
         self.db = cantools.database.load_file(self.config['database_path'])
         self.log_files_directory = self.config['log_files_directory']
         self.connection = self.config['connect']
-        self.connection = True
+        # self.connection = True
+        self.j = 0
 
     @staticmethod
     def load_config():
         with open('config.yaml', 'r') as file:
             return yaml.safe_load(file)
         
-    def connect(self):
-        if self.connection:
-            self.access_canbus()
+    # def connect(self):
+    #     if self.connection:
+    #         self.access_canbus()
 
     def access_canbus(self):
+        # i = 0
         for file_name in os.listdir(self.log_files_directory):
             if file_name.endswith('.log'):
                 self.gather_and_package_data(os.path.join(self.log_files_directory, file_name))
+                # i = i + 1
 
     def gather_and_package_data(self, log_file_path):
         # generate log file, package log data
@@ -74,10 +77,12 @@ class PhysicalTwinSimulation:
                     data_package = {}
     
     def send_data(self, data_package): 
-        for key, value in data_package.items():
-            value['data'] = base64.b64encode(value['data']).decode('utf-8')
-        message = json.dumps(data_package) 
-        client.publish(topic, message)
+        if self.j == 0: # Testing purposes
+            for key, value in data_package.items():
+                value['data'] = base64.b64encode(value['data']).decode('utf-8')
+            message = json.dumps(data_package) 
+            client.publish(topic, message)
+        # self.j = self.j + 1
 
 virtual_twin = PhysicalTwinSimulation()
-virtual_twin.connect()
+virtual_twin.access_canbus()

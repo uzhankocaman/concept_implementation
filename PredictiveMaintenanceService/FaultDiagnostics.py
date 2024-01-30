@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 import yaml
 # from PredictiveMaintenanceService.observer_pattern import Event, Observer
-from utilities.observer_pattern import Event, Observer
+from DataProviderService.observer_pattern import Event, Observer
 from datetime import datetime
 
 # from DataProcessing import DataProcessing

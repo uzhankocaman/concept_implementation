@@ -13,7 +13,7 @@ from PredictiveMaintenanceService.HealthManagement import HealthManagement
 from MaintenanceManagementService.MaintenanceManagementSystem import MaintenanceManagementService
 from DataProviderService.dps import DataProviderService
 
-from utilities.observer_pattern import Event, Observer
+from DataProviderService.observer_pattern import Event, Observer
 """
 Serializes the DT modeling conform to ForestML 4.0.
 """
