@@ -526,17 +526,25 @@ class MaintenanceManagementService(Observer):
 
         advisory = self.advisory
         self.reports[self.j] = {
-            "Maintenance Report Type": self.advisory.get('data_type', 'N/A'),
-            "Analysis": {
-                "Operational Condition": self.advisory.get('operational_condition', 'N/A'),
-                "Health Status": self.advisory.get('fault_diagnostic_health_status', 'N/A'),
-                "Fault Location": self.advisory.get('fault_location', 'N/A'),
-                "Time Detected": self.advisory.get('datetime', 'N/A'),
-                "Fault Severity (1-5 scale)": self.advisory.get('faulty_severity', 'N/A'),
-                "Analysis": self.advisory.get('analysis', 'N/A'),
-                "Maintenance Required": self.advisory.get('maintenance_required', 'N/A')
+                "Maintenance Report Type": self.advisory.get('data_type', 'N/A'),
+                "Analysis": {
+                    "Operational Condition": self.advisory.get('operational_condition', 'N/A'),
+                    "Health Status": self.advisory.get('fault_diagnostic_health_status', 'N/A'),
+                    "Fault Location": self.advisory.get('fault_location', 'N/A'),
+                    "Time Detected": self.advisory.get('datetime', 'N/A'),
+                    "Fault Severity (1-5 scale)": self.advisory.get('faulty_severity', 'N/A'),
+                    "Analysis": self.advisory.get('analysis', 'N/A'),
+                    "Maintenance Required": self.advisory.get('maintenance_required', 'N/A')
+                },
+                "Assignment": {
+                    "Personnel": self.advisory.get("assigned_personnel", 'N/A'),
+                    "Schedule": self.advisory.get("schedule", 'N/A'),
+                    "Component": self.advisory.get("required", {}).get("component", 'N/A'),
+                    "Action": self.advisory.get("required", {}).get("action", 'N/A'),
+                    "Urgency": self.advisory.get("required", {}).get("urgency", 'N/A')
+                }
             }
-        }
+
         self.j += 1
 
         # Convert the report dictionary to a JSON string

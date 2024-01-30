@@ -255,3 +255,12 @@
 2024-01-28 01:28:08,959 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: Connection built via AMQP
 2024-01-28 01:28:09,252 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Repository]: Connection built
 2024-01-28 01:28:09,491 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Broker]: Connection built via AMQP
+2024-01-29 09:13:46,996 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: Start the thing identified as s3i:c2c713c4-910f-405f-86af-e2ce67f6bea5 and named as Maintenance Analysis Harvester
+2024-01-29 09:13:47,948 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][IdentityProvider]: Connection built
+2024-01-29 09:13:47,948 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][IdentityProvider]: Access Token granted
+2024-01-29 09:13:47,948 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Config]: Connection built
+2024-01-29 09:13:48,519 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Directory]: Connection built
+2024-01-29 09:13:48,519 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventSystem]: Setup event system
+2024-01-29 09:13:49,054 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][EventBroker]: Connection built via AMQP
+2024-01-29 09:13:49,382 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Repository]: Connection built
+2024-01-29 09:13:49,604 - INFO - [ForestML 4.0] Maintenance Analysis Harvester: [S3I][Broker]: Connection built via AMQP
