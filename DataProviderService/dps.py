@@ -2,12 +2,12 @@ from utilities.observer_pattern import Event, Observer
 import cantools
 import can
 import os
-from pprint import pprint 
+from pprint import pprint
 import sqlite3
 import pandas as pd
 import yaml
 import time
-import asyncio 
+import asyncio
 import sqlite3
 import pandas as pd
 import sqlite3
@@ -20,11 +20,12 @@ import json
 import base64
 from pandas import Timestamp
 
-broker_address = "localhost" 
-port = 1883  
+broker_address = "localhost"
+port = 1883
 topic = "test/topic"
 
-class DataAcquisitionGateway():
+
+class DataAcquisitionGateway:
     def __init__(self, can_encoder):
         self.on_acquisition = Event()
         # self.config = self.load_config()
@@ -34,16 +35,16 @@ class DataAcquisitionGateway():
         self.client.connect(broker_address, port)
         self.client.subscribe(topic)
         self.start_listening()
-    
-    def on_message(self, client, userdata, message): # communicate_through_mqtt
-        payload = str(message.payload.decode('utf-8'))
+
+    def on_message(self, client, userdata, message):  # communicate_through_mqtt
+        payload = str(message.payload.decode("utf-8"))
         data_package_loaded = json.loads(payload)
         data_package = {}
         for key, value in data_package_loaded.items():
             data_package[int(key)] = value
-        
+
         for key, value in data_package.items():
-            value['data'] = base64.b64decode(value['data'])
+            value["data"] = base64.b64decode(value["data"])
         decoded_package = self.decode_data(data_package)
         aggregated_data = self.standardize_data(decoded_package)
         self.on_acquisition.emit(aggregated_data)
@@ -66,11 +67,14 @@ class DataAcquisitionGateway():
                 for skey, svalue in value.items():
                     aggregated_data[skey] = svalue
             else:
-                aggregated_data["timestamp"] = float("{:.2f}".format(float(decoded_package['timestamp'].strip('()')))) 
-        return aggregated_data 
-    
+                aggregated_data["timestamp"] = float(
+                    "{:.2f}".format(float(decoded_package["timestamp"].strip("()")))
+                )
+        return aggregated_data
+
     def start_listening(self):
         self.client.loop_start()
+
 
 class InformationGateway(Observer):
     def __init__(self, db_file_path):
@@ -80,7 +84,9 @@ class InformationGateway(Observer):
         self.conn = sqlite3.connect(self.db_file_path)
         self.MachineData = {}
         # Testing:
-        self.df = pd.read_excel("C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/DataProviderService/test_sample.xlsx")
+        self.df = pd.read_excel(
+            "C:/Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/DataProviderService/test_sample.xlsx"
+        )
         self.i = 67
 
     def handle_event(self, data):
@@ -96,13 +102,15 @@ class InformationGateway(Observer):
     def store_sensor_data(self, data):
         serialized_data = json.dumps(data)
 
-        self.conn.execute('''CREATE TABLE IF NOT EXISTS SensorData
+        self.conn.execute(
+            """CREATE TABLE IF NOT EXISTS SensorData
                             (ID INTEGER PRIMARY KEY AUTOINCREMENT,
                             Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                            Data TEXT)''')
+                            Data TEXT)"""
+        )
 
         query = "INSERT INTO SensorData (Data) VALUES (?)"
-        self.conn.execute(query, (serialized_data,))  
+        self.conn.execute(query, (serialized_data,))
         self.conn.commit()
 
     def store_maintenance_data(self, data):
@@ -112,10 +120,12 @@ class InformationGateway(Observer):
 
         serialized_data = json.dumps(data, default=default_serializer)
 
-        self.conn.execute('''CREATE TABLE IF NOT EXISTS MaintenanceData
+        self.conn.execute(
+            """CREATE TABLE IF NOT EXISTS MaintenanceData
                             (ID INTEGER PRIMARY KEY AUTOINCREMENT,
                             Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                            Data TEXT)''')
+                            Data TEXT)"""
+        )
 
         query = "INSERT INTO MaintenanceData (Data) VALUES (?)"
         self.conn.execute(query, (serialized_data,))
@@ -125,7 +135,7 @@ class InformationGateway(Observer):
         # Read desired data from database, adjusted for specific need
         query = f"SELECT * FROM ProcessedCANData LIMIT 1 OFFSET {i}"
         df = pd.read_sql_query(query, self.conn)
-        return df.to_dict('records')[0]
+        return df.to_dict("records")[0]
 
     def get_data(self):
         # Implement logic to get the desired data
@@ -138,7 +148,11 @@ class InformationGateway(Observer):
         #         print("=====")
         #         return self.MachineData
         #     return None
-        if self.last_data is not None and not any(math.isnan(value) for value in self.last_data.values() if isinstance(value, float)):
+        if self.last_data is not None and not any(
+            math.isnan(value)
+            for value in self.last_data.values()
+            if isinstance(value, float)
+        ):
             self.MachineData["timestamp"] = self.last_data["timestamp"]
             self.MachineData["RPM_Diesel"] = self.last_data["RPM_Diesel"]
             self.MachineData["FuelPressure"] = self.last_data["FuelPressure"]
@@ -167,23 +181,25 @@ class InformationGateway(Observer):
             self.last_data = None
             return self.MachineData.values()
         return None
-    
+
     def __del__(self):
         self.conn.close()
 
-class DataProviderService():
+
+class DataProviderService:
     def __init__(self):
         self.config = self.load_config()
         self.MachineData = {}
-        self.data_gateway = DataAcquisitionGateway(self.config['can_encoder'])
+        self.data_gateway = DataAcquisitionGateway(self.config["can_encoder"])
         self.information_gateway = InformationGateway(self.config["db_file_path"])
         self.data_gateway.on_acquisition.subscribe(self.information_gateway)
 
     @staticmethod
     def load_config():
-        with open('config.yaml', 'r') as file:
+        with open("config.yaml", "r") as file:
             return yaml.safe_load(file)
-    
+
+
 # dps = DataProviderService()
 
 # dps.information_gateway.get_data()

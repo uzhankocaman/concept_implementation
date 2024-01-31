@@ -2,8 +2,8 @@
 # import json
 # import base64
 
-# broker_address = "localhost" 
-# port = 1883  
+# broker_address = "localhost"
+# port = 1883
 # topic = "test/topic"
 
 # def on_message(client, userdata, message):

@@ -38,9 +38,12 @@ import os
 import logging
 
 import matplotlib.pyplot as plt
+
 # from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from utilities.observer_pattern import Event, Observer
+
 # from .monitoring import MonitoringUI
+
 
 class PersonnelManager:
     """A class to manage personnel schedules and skills."""
@@ -121,9 +124,7 @@ class InventoryManager:
     def get_estimated_arrival_time(self, part_name):
         """Get the estimated arrival time for an ordered part."""
         days_to_arrival = self.delivery_times.get(part_name, 0)
-        arrival_date = timedelta(
-            days=days_to_arrival
-        )
+        arrival_date = timedelta(days=days_to_arrival)
         return arrival_date
 
 
@@ -138,7 +139,13 @@ class MaintenanceManagementService(Observer):
         self.j = 0
         #  self.delivery_times adjust code
         self.lock = threading.Lock()
-        personnel = ["Technician1", "Technician2", "Engineer1", "Engineer2", "Engineer3"]
+        personnel = [
+            "Technician1",
+            "Technician2",
+            "Engineer1",
+            "Engineer2",
+            "Engineer3",
+        ]
         self.personnel_system = PersonnelManager(personnel)
         self.personnel_system.add_personnel_skills("Technician1", {"replace"})
         self.personnel_system.add_personnel_skills("Technician2", {"replace"})
@@ -287,7 +294,6 @@ class MaintenanceManagementService(Observer):
         """
         )
 
-
         cursor.execute(
             "INSERT OR REPLACE INTO system_state (key, value) VALUES ('maintenance_required', ?)",
             (True,),
@@ -295,19 +301,19 @@ class MaintenanceManagementService(Observer):
         cursor.execute(
             "INSERT OR REPLACE INTO system_state (key, value) VALUES ('constraints', ?)",
             (json.dumps(0),),
-        ) 
+        )
 
         conn.commit()
         conn.close()
 
     def handle_event(self, data):
-        with self.lock: 
+        with self.lock:
             self.receive_maintenance_advisory(data)
-            if self.advisories.qsize() == 2: #wait for all advisories to process
+            if self.advisories.qsize() == 2:  # wait for all advisories to process
                 self.run()
             else:
                 logging.info("Waiting for conditions to be met to process advisories.")
-    
+
     def run(self):
         self.process_maintenance_needs()
         self.update_system_status()
@@ -370,8 +376,11 @@ class MaintenanceManagementService(Observer):
                 "component": "filter",
                 "urgency": "scheduled",
             }
-        if self.advisory['data_type'] == 'battery' and self.advisory['analysis'] == 'health problem':
-            severity = self.advisory['fault_severity']
+        if (
+            self.advisory["data_type"] == "battery"
+            and self.advisory["analysis"] == "health problem"
+        ):
+            severity = self.advisory["fault_severity"]
             if severity > 4:
                 self.advisory["required"] = {
                     "action": "replace",
@@ -391,7 +400,7 @@ class MaintenanceManagementService(Observer):
                     "urgency": "scheduled",
                 }
         else:
-            self.advisory['required'] = {
+            self.advisory["required"] = {
                 "action": "N/A",
                 "component": "N/A",
                 "urgency": "N/A",
@@ -399,7 +408,6 @@ class MaintenanceManagementService(Observer):
 
         self.apply_constraints_to_maintenance_action()
         self.check_availability_of_necessary_parts_and_tools()
-
 
     def apply_constraints_to_maintenance_action(self):
         """Apply cost constraints to the maintenance action."""
@@ -428,13 +436,19 @@ class MaintenanceManagementService(Observer):
                 )
 
                 if quantity_available <= 0:
-                    reorder_quantity = self.inventory_manager.determine_reorder_quantity(
-                        required_component
+                    reorder_quantity = (
+                        self.inventory_manager.determine_reorder_quantity(
+                            required_component
+                        )
                     )
                     self.inventory_manager.order_new_inventory(
                         required_component, reorder_quantity
                     )
-                    self.advisory["required"]["delay_due_missing_part"] = self.inventory_manager.get_estimated_arrival_time(required_component)
+                    self.advisory["required"][
+                        "delay_due_missing_part"
+                    ] = self.inventory_manager.get_estimated_arrival_time(
+                        required_component
+                    )
             else:
                 self.advisory["required"]["delay_due_missing_part"] = timedelta(days=0)
 
@@ -451,16 +465,22 @@ class MaintenanceManagementService(Observer):
             "scheduled": timedelta(days=7),
             "immediate": timedelta(days=0),
         }  # assuming a scheduled task can be done after 7 days, and a immediate task needs be handled asap
-        delay_due_personnel = timedelta(days=3)  # assuming the maintenance provider has a fixed notice period of 3 days for any personnel
-        delay_due_missing_part = self.advisory["required"].get("delay_due_missing_part", timedelta(days=0))
+        delay_due_personnel = timedelta(
+            days=3
+        )  # assuming the maintenance provider has a fixed notice period of 3 days for any personnel
+        delay_due_missing_part = self.advisory["required"].get(
+            "delay_due_missing_part", timedelta(days=0)
+        )
         delay = max(
             delay_due_missing_part,
             delay_due_personnel,
             urgency_task[self.advisory["required"]["urgency"]],
         )
-        if isinstance(self.advisory["datetime"], str) and self.advisory["datetime"].startswith("Timestamp('"):
+        if isinstance(self.advisory["datetime"], str) and self.advisory[
+            "datetime"
+        ].startswith("Timestamp('"):
             datetime_str = self.advisory["datetime"].split("'")[1]
-            schedule_datetime = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+            schedule_datetime = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
         elif isinstance(self.advisory["datetime"], pd.Timestamp):
             schedule_datetime = self.advisory["datetime"].to_pydatetime()
             schedule = schedule_datetime + delay
@@ -468,7 +488,7 @@ class MaintenanceManagementService(Observer):
 
     def allocate_personnel_to_task(self):
         """Assign personnel to carry out the scheduled maintenance tasks considering their availability and skills."""
-        for person in self.personnel_system.skills: 
+        for person in self.personnel_system.skills:
             if self.personnel_system.is_personnel_available_on_date(
                 person, self.advisory["schedule"]
             ) and self.personnel_system.person_has_required_skill(
@@ -496,24 +516,30 @@ class MaintenanceManagementService(Observer):
     def generate_report(self):
         advisory = self.advisory
         self.reports[self.j] = {
-                "Maintenance Report Type": self.advisory.get('data_type', 'N/A'),
-                "Analysis": {
-                    "Operational Condition": self.advisory.get('operational_condition', 'N/A'),
-                    "Fault Location": self.advisory.get('fault_location', 'N/A'),
-                    "Time of Analysis": self.advisory.get('datetime', 'N/A'),
-                    "Fault Severity (1-5 scale)": self.advisory.get('faulty_severity', 'N/A'),
-                    "Analysis": self.advisory.get('analysis', 'N/A'),
-                    "Maintenance Required": self.advisory.get('maintenance_required', 'N/A')
-                },
-                "Assignment": {
-                    "Personnel": self.advisory.get("assigned_personnel", 'N/A'),
-                    "Schedule": self.advisory.get("schedule", 'N/A'),
-                    "Component": self.advisory.get("required", {}).get("component", 'N/A'),
-                    "Action": self.advisory.get("required", {}).get("action", 'N/A'),
-                    "Urgency": self.advisory.get("required", {}).get("urgency", 'N/A')
-                }
-            }
-        
+            "Maintenance Report Type": self.advisory.get("data_type", "N/A"),
+            "Analysis": {
+                "Operational Condition": self.advisory.get(
+                    "operational_condition", "N/A"
+                ),
+                "Fault Location": self.advisory.get("fault_location", "N/A"),
+                "Time of Analysis": self.advisory.get("datetime", "N/A"),
+                "Fault Severity (1-5 scale)": self.advisory.get(
+                    "faulty_severity", "N/A"
+                ),
+                "Analysis": self.advisory.get("analysis", "N/A"),
+                "Maintenance Required": self.advisory.get(
+                    "maintenance_required", "N/A"
+                ),
+            },
+            "Assignment": {
+                "Personnel": self.advisory.get("assigned_personnel", "N/A"),
+                "Schedule": self.advisory.get("schedule", "N/A"),
+                "Component": self.advisory.get("required", {}).get("component", "N/A"),
+                "Action": self.advisory.get("required", {}).get("action", "N/A"),
+                "Urgency": self.advisory.get("required", {}).get("urgency", "N/A"),
+            },
+        }
+
         self.reports[self.j] = self.generate_filtered_report()
         self.j += 1
 
@@ -523,14 +549,14 @@ class MaintenanceManagementService(Observer):
             if isinstance(value, dict):  # Check if the value is a dictionary
                 filtered_report[key] = {}
                 for sub_key, sub_value in value.items():
-                    if sub_value != 'N/A':
+                    if sub_value != "N/A":
                         filtered_report[key][sub_key] = sub_value
                 if not filtered_report[key]:
                     del filtered_report[key]
             else:
-                if value != 'N/A':
+                if value != "N/A":
                     filtered_report[key] = value
-        
+
         return filtered_report
 
     def get_reports(self):

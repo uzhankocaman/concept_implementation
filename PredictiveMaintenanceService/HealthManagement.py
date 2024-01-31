@@ -4,6 +4,7 @@ from utilities.observer_pattern import Observer, Event
 import pandas as pd
 import logging
 import time
+
 # from DataAcquisition import DataAcquisition
 # from DataProcessing import DataProcessing
 # from StateAdaptation import StateAdaptation
@@ -11,6 +12,7 @@ import time
 # from FaultDiagnostics import FaultDiagnostic
 import numpy as np
 import sqlite3
+
 
 class HealthManagement(Observer):
     def __init__(self):
@@ -42,7 +44,7 @@ class HealthManagement(Observer):
         self.transmit_advisory()
 
     def is_ready_to_transmit_advisory(self):
-        if self.i >= 2: 
+        if self.i >= 2:
             return True
         else:
             return False
@@ -50,27 +52,39 @@ class HealthManagement(Observer):
     def process_assessments(self):
         self.organize_data()
         logging.info("Assessments processed and organized.")
-    
+
     def organize_data(self):
         self.organized_data = {}
         for index in range(self.i):
-            if np.sum(self.data[index].keys() == 'fault_diagnostic_report'):
+            if np.sum(self.data[index].keys() == "fault_diagnostic_report"):
                 entry = self.data[index]
                 self.organized_data = {
                     "datetime": entry["datetime"],
                     "data_type": entry["configuration"]["data_type"],
-                    "operational_condition": entry["configuration"]["operational_condition"],
-                    "fault_diagnostic_health_status": entry["fault_diagnostic_report"].get("health_status", None),
-                    "fault_diagnostic_health_metric": entry["fault_diagnostic_report"].get("health", None),
-                    "fault_location": entry["fault_diagnostic_report"].get("fault_location", None),
-                    "fault_severity": entry["fault_diagnostic_report"].get("fault_severity", None),
+                    "operational_condition": entry["configuration"][
+                        "operational_condition"
+                    ],
+                    "fault_diagnostic_health_status": entry[
+                        "fault_diagnostic_report"
+                    ].get("health_status", None),
+                    "fault_diagnostic_health_metric": entry[
+                        "fault_diagnostic_report"
+                    ].get("health", None),
+                    "fault_location": entry["fault_diagnostic_report"].get(
+                        "fault_location", None
+                    ),
+                    "fault_severity": entry["fault_diagnostic_report"].get(
+                        "fault_severity", None
+                    ),
                     # "prognostic_status": entry["prognostics_report"].get("prognostic_status", None),
                 }
-    
+
     def integrate_information(self):
         # Concatenate the organized data into one dictionary.
         self.integrated_data = self.organized_data
-        logging.info("Information from assessments integrated into a single dictionary.")
+        logging.info(
+            "Information from assessments integrated into a single dictionary."
+        )
 
     def generate_advisory(self):
         self.advisory = self.create_advisory_based_on_data()
@@ -78,14 +92,20 @@ class HealthManagement(Observer):
 
     def create_advisory_based_on_data(self):
         advisories = {
-            ('battery', int): "health problem",
-            ('battery', int): "charging problem",
-            ('filter', int): "high pressure detected",
+            ("battery", int): "health problem",
+            ("battery", int): "charging problem",
+            ("filter", int): "high pressure detected",
         }
-        if self.integrated_data['data_type'] == 'battery':
-            condition_key = (self.integrated_data['data_type'], type(self.integrated_data["fault_severity"]))
-        if self.integrated_data['data_type'] == 'filter':
-            condition_key = (self.integrated_data['data_type'], type(self.integrated_data["fault_severity"]))
+        if self.integrated_data["data_type"] == "battery":
+            condition_key = (
+                self.integrated_data["data_type"],
+                type(self.integrated_data["fault_severity"]),
+            )
+        if self.integrated_data["data_type"] == "filter":
+            condition_key = (
+                self.integrated_data["data_type"],
+                type(self.integrated_data["fault_severity"]),
+            )
         analysis = advisories.get(condition_key, "Status normal.")
         self.integrated_data["analysis"] = analysis
 
@@ -97,6 +117,7 @@ class HealthManagement(Observer):
         self.organized_data.clear()
         self.integrated_data.clear()
         self.i = 0
+
 
 # data_acquisition = DataAcquisition()
 # data_processor = DataProcessing()
@@ -124,12 +145,12 @@ class HealthManagement(Observer):
 # file_path='PredictiveMaintenanceService/test.xlsx'
 # df_raw = pd.read_excel(file_path)
 # for i in range(len(df_raw)):
-#     df_processed = df_raw.loc[df_raw.index[i]]   
+#     df_processed = df_raw.loc[df_raw.index[i]]
 #     # print(df_processed)
 #     print("battery KKK")
 #     data_acquisition.collect_data(df_processed, 'battery')
 #     print("filter KKK")
 #     data_acquisition.collect_data(df_processed, "filter")
 
-# df_processed = df_raw.loc[df_raw.index[0]]  
-# data_acquisition.collect_data(df_processed, 'battery') 
+# df_processed = df_raw.loc[df_raw.index[0]]
+# data_acquisition.collect_data(df_processed, 'battery')

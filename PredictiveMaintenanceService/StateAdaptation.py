@@ -2,6 +2,7 @@ import pandas as pd
 from utilities.observer_pattern import Event, Observer
 import yaml
 
+
 class StateAdaptation(Observer):
     def __init__(self):
         super().__init__()
@@ -27,14 +28,18 @@ class StateAdaptation(Observer):
         self.processed_data = pd.Series()
         state_assessed_data = pd.Series()
 
-
     def load_known_conditions(self):
-        with open('C://Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/PredictiveMaintenanceService/known_conditions.yaml', 'r') as file:
+        with open(
+            "C://Users/U/Documents/4.Semester/Masterarbeit/concept_implementation/PredictiveMaintenanceService/known_conditions.yaml",
+            "r",
+        ) as file:
             conditions = yaml.safe_load(file)
-        for condition, expression in conditions['battery'].items():
-            self.known_conditions['battery'][condition] = eval(f"lambda x: {expression}")
-        for condition, expression in conditions['filter'].items():
-            self.known_conditions['filter'][condition] = expression
+        for condition, expression in conditions["battery"].items():
+            self.known_conditions["battery"][condition] = eval(
+                f"lambda x: {expression}"
+            )
+        for condition, expression in conditions["filter"].items():
+            self.known_conditions["filter"][condition] = expression
 
     def run(self):
         # Start with aligning sensor data with machine configuration
@@ -42,7 +47,7 @@ class StateAdaptation(Observer):
 
         self.tune_model_based_on_optimization_criteria()
 
-        self.link_data_to_operational_condition()    
+        self.link_data_to_operational_condition()
         # Check if the operational condition is known
         if self.is_condition_known():
             # Set configuration to the corresponding known condition
@@ -58,19 +63,28 @@ class StateAdaptation(Observer):
                 self.initialize_new_configuration_setting(self.processed_data)
 
     def link_data_to_operational_condition(self):
-        self.operational_condition = None # Unknown condition
+        self.operational_condition = None  # Unknown condition
         if self.category == "battery":
-            for condition_name, condition_func in self.known_conditions[self.category].items():
+            for condition_name, condition_func in self.known_conditions[
+                self.category
+            ].items():
                 if condition_func(self.processed_data[self.value]):
                     self.operational_condition = condition_name
         if self.category == "filter":
-            self.operational_condition = self.known_conditions["filter"]["slope"] * self.processed_data["RPM_Diesel"] + self.known_conditions["filter"]["intercept"] 
-
+            self.operational_condition = (
+                self.known_conditions["filter"]["slope"]
+                * self.processed_data["RPM_Diesel"]
+                + self.known_conditions["filter"]["intercept"]
+            )
 
     def set_configuration_setting(self):
         # Logic to set configuration based on known condition
         print(f"Setting configuration for condition: {self.operational_condition}")
-        self.configuration_setting = {"data_type": self.category, "operational_condition": self.operational_condition, "model": self.model}
+        self.configuration_setting = {
+            "data_type": self.category,
+            "operational_condition": self.operational_condition,
+            "model": self.model,
+        }
         self.processed_data["configuration"] = self.configuration_setting
 
     def align_data_with_configuration(self):
@@ -83,22 +97,25 @@ class StateAdaptation(Observer):
         # Check if the operational condition is known within the specified category
         if self.category == "battery":
             category_conditions = self.known_conditions.get(self.category)
-            if category_conditions and self.operational_condition in category_conditions:
+            if (
+                category_conditions
+                and self.operational_condition in category_conditions
+            ):
                 return True
         if self.category == "filter" and self.operational_condition != None:
             return True
         return False
 
     def initialize_new_configuration_setting(self, data):
-        self.set_configuration_setting() # deployed with nan
+        self.set_configuration_setting()  # deployed with nan
 
     def adjust_operating_condition_boundaries(self, data):
         # Current version supporting battery only as it has discrete boundaries
-        if self.category == 'battery':
+        if self.category == "battery":
             # Threshold optimization
             max_extension = 0.1  # Maximum allowable extension for a condition boundary
             closest_condition = None
-            closest_distance = float('inf')  # Initialize with a large number
+            closest_distance = float("inf")  # Initialize with a large number
 
             # Find the closest condition that can be extended
             for condition, check in self.known_conditions[self.category].items():
@@ -109,7 +126,9 @@ class StateAdaptation(Observer):
                     distance = min(abs(lower - data), abs(upper - data))
 
                     # Check if this condition is closer and can be extended to include new data
-                    if distance < closest_distance and (lower - max_extension <= data <= upper + max_extension):
+                    if distance < closest_distance and (
+                        lower - max_extension <= data <= upper + max_extension
+                    ):
                         closest_condition = condition
                         closest_distance = distance
 
@@ -118,8 +137,13 @@ class StateAdaptation(Observer):
                 lower, upper = self.known_conditions[self.category][closest_condition]
                 new_lower = min(lower, data)
                 new_upper = max(upper, data)
-                self.known_conditions[self.category][closest_condition] = (new_lower, new_upper)
-                print(f"Extended boundary of '{closest_condition}' to include new data: {new_lower} to {new_upper}")
+                self.known_conditions[self.category][closest_condition] = (
+                    new_lower,
+                    new_upper,
+                )
+                print(
+                    f"Extended boundary of '{closest_condition}' to include new data: {new_lower} to {new_upper}"
+                )
             else:
                 # Add new condition
                 lower_bound = None
@@ -130,23 +154,29 @@ class StateAdaptation(Observer):
                         if data > condition_range[1]:
                             lower_bound = float(condition_range[1])
                         # Check if data falls outside the upper boundary
-                        elif data < condition_range[0] and (upper_bound is None or condition_range[0] < upper_bound):
+                        elif data < condition_range[0] and (
+                            upper_bound is None or condition_range[0] < upper_bound
+                        ):
                             upper_bound = float(condition_range[0])
 
                 # Create a new range for the condition
                 try:
-                    new_condition_range = (lower_bound + 0.1 if lower_bound is not None else data - 1, 
-                                        upper_bound - 0.1 if upper_bound is not None else data + 1)
+                    new_condition_range = (
+                        lower_bound + 0.1 if lower_bound is not None else data - 1,
+                        upper_bound - 0.1 if upper_bound is not None else data + 1,
+                    )
                     # Create a new condition with this range
-                    new_condition_name = f"new_condition_{len(self.known_conditions[self.category]) + 1}"
-                    self.known_conditions[self.category][new_condition_name] = lambda x: new_condition_range[0] <= x <= new_condition_range[1]
+                    new_condition_name = (
+                        f"new_condition_{len(self.known_conditions[self.category]) + 1}"
+                    )
+                    self.known_conditions[self.category][new_condition_name] = (
+                        lambda x: new_condition_range[0] <= x <= new_condition_range[1]
+                    )
                 except TypeError:
                     print("TypeError")
 
-                
-
     def tune_model_based_on_optimization_criteria(self):
-        """ Calls the appropriate models based on optimization criteria (such as cost-efficiency) derived from machine. """
+        """Calls the appropriate models based on optimization criteria (such as cost-efficiency) derived from machine."""
         # placeholder
         model_configuration = {"precision": "model-1", "recall": "model-2"}
         self.model = model_configuration["precision"]

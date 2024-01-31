@@ -1,8 +1,9 @@
-from datetime import datetime 
+from datetime import datetime
 from utilities.observer_pattern import Event, Observer
 import time
 
-#done
+
+# done
 class Prognostics(Observer):
     def __init__(self):
         super().__init__()
@@ -43,14 +44,14 @@ class Prognostics(Observer):
         """
         if self.is_degradation(data):
             return self.predict_rul_state
-        return self.assess_system_health_state 
+        return self.assess_system_health_state
 
     def predict_rul_state(self, data):
         """
         Predict the Remaining Useful Life (RUL) of the system.
         """
         rul = self.estimate_rul(data)
-        self.rul = rul  
+        self.rul = rul
         return self.assess_system_health_state
 
     def assess_system_health_state(self, data):
@@ -59,7 +60,7 @@ class Prognostics(Observer):
         """
         report = self.report_generate(data)
         self.report_send(report)
-        return None #End
+        return None  # End
 
     def is_model(self):
         time.sleep(0.1)
@@ -91,4 +92,3 @@ class Prognostics(Observer):
         Update the predictive model from an external source.
         """
         self.model_last_updated = datetime.now()
-
