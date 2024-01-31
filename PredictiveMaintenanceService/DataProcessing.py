@@ -39,8 +39,6 @@ class DataProcessing(Observer):
         self.df_raw = accessed_data
         self.df_processed = accessed_data
         self.process_data()
-        # state_processed_data = self.df_processed.copy()
-        # self.on_data_processed.emit(state_processed_data)
         self.df_processed = pd.Series()
         self.df_raw = pd.Series()
 
@@ -226,13 +224,3 @@ def apply_pca(df, n_components):
     pca = PCA(n_components=n_components)
     principal_components = pca.fit_transform(df)
     return pd.DataFrame(data=principal_components)
-
-# Extraction of Health Metrics
-
-# System-Level Data Processing
-
-# Component-Level Data Processing
-
-# Feature Sets for State, Fault Diagnostics, Prognostics
-        
-# data_processor.process_data('fuel')

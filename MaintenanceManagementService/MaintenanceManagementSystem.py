@@ -301,7 +301,6 @@ class MaintenanceManagementService(Observer):
         conn.close()
 
     def handle_event(self, data):
-        print("test")
         with self.lock: 
             self.receive_maintenance_advisory(data)
             if self.advisories.qsize() == 2: #wait for all advisories to process

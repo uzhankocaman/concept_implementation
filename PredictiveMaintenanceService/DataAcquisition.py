@@ -35,7 +35,6 @@ class DataAcquisition:
         df["data_type"] = data_type # filter, battery
         df["datetime"] = datetime.fromtimestamp(int(df["timestamp"]))
         self.on_data_accessed.emit(df.copy())
-        print("test")
 
     def store_data(self, df):
         if self.accumulated_data is None:

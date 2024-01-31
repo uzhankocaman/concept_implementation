@@ -20,7 +20,6 @@ class StateAdaptation(Observer):
         self.load_known_conditions()
 
     def handle_event(self, processed_data):
-        print("hello SAA event")
         self.processed_data = processed_data
         self.run()
         state_assessed_data = self.processed_data.copy()

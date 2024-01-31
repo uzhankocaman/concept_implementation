@@ -40,7 +40,6 @@ class HealthManagement(Observer):
         self.integrate_information()
         self.generate_advisory()
         self.transmit_advisory()
-        print("finish")
 
     def is_ready_to_transmit_advisory(self):
         if self.i >= 2: 
