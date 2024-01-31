@@ -250,7 +250,7 @@ class MaintenanceAnalysisHarvester(Thing):
                 .subFeatures["ml40::Event"]
                 .exampleContent["reports"]
             )
-            # self.data_provider.information_gateway.store_maintenance_data(self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"])
+            self.data_provider.information_gateway.store_maintenance_data(self.entry.features["ml40::EventList"].subFeatures["ml40::Event"].exampleContent["reports"])
         else:
             print("Waiting for data...")
         # speichern dps call
